@@ -119,6 +119,31 @@
   .choice:hover,.choice:focus-visible{border-color:var(--ambar); background:rgba(201,135,47,.1); transform:translateX(5px); outline:none;}
   .choice .n{position:absolute; left:14px; top:50%; transform:translateY(-50%); font-family:'VT323',monospace; color:var(--ambar); font-size:1.1rem;}
 
+  /* ===== CRÉDITOS FLOTANTES (cierre de la obra) =====
+     Texto flotante centrado + acciones con iconos. Entrada suave (fade-in heredado de #scene)
+     y flotación continua muy leve de la tarjeta. Respeta prefers-reduced-motion (sin flotar). */
+  .credits-scene{min-height:68vh; min-height:68svh; display:flex; align-items:center; justify-content:center; text-align:center;}
+  .credits-card{position:relative; max-width:600px; padding:clamp(26px,5vw,44px); border:1px solid var(--hair); border-radius:14px;
+    background:linear-gradient(180deg, rgba(20,17,12,.6), rgba(20,17,12,.42)); backdrop-filter:blur(7px);
+    box-shadow:0 18px 60px rgba(0,0,0,.45), inset 0 0 40px rgba(201,135,47,.06);
+    animation:creditFloat 7s var(--ease) infinite;}
+  .credits-card .kicker{margin:0 0 18px;}
+  .credits-body{display:flex; flex-direction:column; gap:10px; margin:0 0 30px;}
+  .credits-body p{margin:0;}
+  .credits-body .c-obra{font-family:'Orbitron','Oswald',sans-serif; font-weight:700; font-size:var(--fs-h2); line-height:1.05; color:var(--hueso); text-shadow:0 2px 20px rgba(0,0,0,.55), 0 0 18px rgba(201,135,47,.28);}
+  .credits-body .c-anio{font-family:'VT323',monospace; letter-spacing:.3em; color:var(--ambar); font-size:1.1rem;}
+  .credits-body .c-inst{color:var(--arena-clara); font-size:var(--fs-body); line-height:1.5;}
+  .credits-body .c-fac{color:var(--arena); font-size:.98rem; letter-spacing:.04em;}
+  .credits-actions{display:flex; flex-wrap:wrap; gap:12px; justify-content:center;}
+  .credit-btn{display:inline-flex; align-items:center; gap:10px; min-height:44px; padding:13px 22px; border-radius:6px; cursor:pointer;
+    font-family:'VT323',monospace; font-size:1.1rem; letter-spacing:.12em; text-transform:uppercase; transition:all .25s var(--ease);}
+  .credit-btn:first-child{color:var(--noche); background:var(--ambar); border:1px solid var(--ambar); box-shadow:0 0 24px rgba(201,135,47,.28);}
+  .credit-btn:first-child:hover,.credit-btn:first-child:focus-visible{background:var(--hueso); border-color:var(--hueso); box-shadow:0 0 38px rgba(201,135,47,.5); transform:translateY(-2px); outline:none;}
+  .credit-btn:not(:first-child){color:var(--arena); background:transparent; border:1px solid var(--hair-s);}
+  .credit-btn:not(:first-child):hover,.credit-btn:not(:first-child):focus-visible{color:var(--ambar); border-color:var(--ambar); transform:translateY(-2px); outline:none;}
+  .credit-btn .ci{width:22px; height:22px; flex:0 0 auto;}
+  @keyframes creditFloat{0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);}}
+
   /* HUD: ruta actual + recursos opcionales + volver */
   #hud{position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:40; display:flex; gap:16px; align-items:center; font-family:'VT323',monospace; letter-spacing:.14em; font-size:.82rem; text-transform:uppercase; color:var(--arena); background:rgba(20,17,12,.6); border:1px solid var(--hair); border-radius:20px; padding:7px 16px; backdrop-filter:blur(6px); transition:opacity .4s;}
   #hud .sep{color:var(--hair-s);}
@@ -162,6 +187,9 @@
     /* Lectura estática y legible: sin fade por scroll ni desplazamiento. */
     .body p{opacity:1 !important; transform:none !important; transition:none !important; will-change:auto;}
     .track-refugio #scene h2,.track-lyra #scene h2,.track-cronos #scene h2{animation:none !important;}
+    /* Créditos estáticos: sin flotación ni desplazamientos en hover. */
+    .credits-card{animation:none !important;}
+    .credit-btn:hover,.credit-btn:focus-visible{transform:none !important;}
   }
 </style>
 </head>
@@ -266,7 +294,19 @@ var G = {
   texto:["El agua vuelve a correr, fría y luminosa, por los grandes canales de tungsteno y roca viva. La montaña y la máquina se reconocieron al fin, y ese pacto lo tejiste tú, con tu propia mano.",
     "Devolviste el latido a un mundo que se apagaba. El Páramo respira. La ciudad bebe. La simulación encuentra su calma. Cumpliste tu tarea como Enlace."],
   nota:"Cerraste el ciclo en equilibrio. El páramo te pide una última vigilia: protege el acuífero con tus propias manos.",
-  opc:[{t:"▸ Iniciar la vigilia del acuífero",d:"__game__"},{t:"Volver al inicio y explorar otros caminos.",d:"llegada_paramo"}]},
+  opc:[{t:"Cerrar la travesía y ver los créditos.",d:"creditos"},{t:"Volver al inicio y explorar otros caminos.",d:"llegada_paramo"}]},
+
+/* ---- CRÉDITOS: cierre de la obra (texto flotante interactivo) + acceso al minijuego ----
+   Nodo especial: render() lo detecta por la bandera creditos y pinta un layout flotante propio
+   (no el de párrafos + choices). Mantiene track 'cota' para no romper HUB_ORDER/progreso. */
+ creditos:{track:'cota',img:IMG.valle,creditos:true,kicker:'Travesía · Créditos',titulo:'Páramo Omega',
+  lineas:[
+    {clase:'c-obra', txt:'Páramo Omega'},
+    {clase:'c-anio', txt:'2026'},
+    {clase:'c-inst', txt:'Universidad Distrital Francisco José de Caldas'},
+    {clase:'c-fac',  txt:'Facultad de Educación'}
+  ],
+  opc:[{t:"Iniciar el videojuego",d:"__game__",icon:"play"},{t:"Volver al inicio",d:"llegada_paramo",icon:"home"}]},
 
 /* ---- REFUGIO ZERO ---- */
  refugio_1:{track:'refugio',img:IMG.duna,kicker:'Refugio Zero · Día 412',titulo:'La escotilla',
@@ -421,7 +461,7 @@ var history=[];
 // viewport y se "atenúa" al alejarse (fade IN al entrar en foco, fade OUT al salir). El efecto
 // sustituye el antiguo reveal de entrada única + floatX para no competir por el transform.
 var READ_PS=[];                 // párrafos de la escena actual
-var OP_FLOOR=0.18;              // opacidad mínima fuera de foco (gradual, nunca invisible del todo)
+var OP_FLOOR=0;                 // opacidad fuera de foco: el párrafo se centra y luego DESAPARECE (estilo The Boat). Solo afecta a #scene .body p; las .choice nunca entran en este cálculo.
 var MAX_TY=26;                  // desplazamiento vertical máximo (px) al alejarse del foco
 // collectParagraphs: refresca la lista de párrafos de la escena actual. En reduced-motion se
 // dejan planos (sin variables) para que queden legibles y estáticos vía CSS.
@@ -431,7 +471,8 @@ function collectParagraphs(){
 }
 // updateReadingFocus: recalcula opacidad/desplazamiento de cada párrafo según la distancia de su
 // centro al centro del viewport. foco pleno dentro de la banda central (focus), caída suave hasta
-// el borde de foco (fade) y meseta en OP_FLOOR más allá. Pensada para correr dentro de rAF.
+// el borde de foco (fade) y, más allá, desaparición total (OP_FLOOR=0). Solo recorre #scene .body p,
+// así que los botones de decisión (.choice) nunca se atenúan. Pensada para correr dentro de rAF.
 function updateReadingFocus(){
   if(reduced || !READ_PS.length) return;
   var vh=window.innerHeight||document.documentElement.clientHeight, mid=vh/2;
@@ -454,9 +495,45 @@ function updateReadingFocus(){
   }
 }
 
+// ====== ICONOS SVG INLINE (sin librerías, heredan currentColor de los tokens) ======
+// play  : gota con triángulo de "iniciar" dentro (tema Guardián del Acuífero).
+// home  : montaña/páramo con sendero, para la vuelta al inicio.
+var ICONS={
+  play:'<svg class="ci" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.6c3.4 4 6 7.2 6 10.6a6 6 0 0 1-12 0c0-3.4 2.6-6.6 6-10.6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10.6 10.3 14.4 13l-3.8 2.7Z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>',
+  home:'<svg class="ci" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 18 9.5 7l4 6 2.2-3.4L21 18Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 18h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'
+};
+// renderCredits: pinta la pantalla de cierre (créditos flotantes + acciones con iconos).
+// Reutiliza #scene pero con la clase .credits-scene para un layout centrado; las acciones usan
+// transitionTo (misma transición con veil) para ir al minijuego (__game__ → GAME.open) o al inicio.
+function renderCredits(s){
+  var lineas=s.lineas.map(function(l){ return '<p class="'+l.clase+'">'+l.txt+'</p>'; }).join('');
+  var acciones=s.opc.map(function(o){
+    return '<button class="credit-btn" data-go="'+o.d+'">'+(ICONS[o.icon]||'')+'<span>'+o.t+'</span></button>';
+  }).join('');
+  scene.innerHTML=
+    '<div class="credits-scene">'+
+      '<div class="credits-card">'+
+        '<p class="kicker">'+s.kicker+'</p>'+
+        '<div class="credits-body">'+lineas+'</div>'+
+        '<div class="credits-actions">'+acciones+'</div>'+
+      '</div>'+
+    '</div>';
+  scene.classList.remove('fade-in'); void scene.offsetWidth; if(!reduced) scene.classList.add('fade-in');
+  // No hay párrafos de cuerpo en esta escena: la lectura por scroll queda inactiva.
+  READ_PS=[];
+  [].slice.call(scene.querySelectorAll('.credit-btn')).forEach(function(b){
+    b.addEventListener('click',function(){ transitionTo(b.getAttribute('data-go')); });
+  });
+  hud.innerHTML='<span class="here">'+TRACK_LABEL[s.track]+'</span><span class="sep">·</span><span>Historia central</span>';
+  progress.style.width='100%';
+  window.scrollTo(0,0);
+  refreshRoutes();
+}
+
 function render(id, pushHist){
-  var s=G[id]; if(!s) return;
+  // Destino especial del minijuego: se resuelve antes de buscar el nodo en G (no existe G['__game__']).
   if(id==='__game__'){ GAME.open(); return; }
+  var s=G[id]; if(!s) return;
   if(pushHist!==false) history.push(id);
   // viraje de ruta en el <main>
   stage.className='on track-'+s.track;
@@ -464,6 +541,14 @@ function render(id, pushHist){
   if(bg.getAttribute('data-img')!==s.img){ bg.style.opacity='0'; setTimeout(function(){ bg.style.backgroundImage="url('"+s.img+"')"; bg.setAttribute('data-img',s.img); bg.style.opacity='1'; },180); }
   // audio por ruta
   AUDIO.set(TRACK_AUDIO[s.track]);
+  // ----- PANTALLA ESPECIAL: CRÉDITOS FLOTANTES -----
+  // Cierre de la obra: bloque de créditos con entrada flotante + acciones con iconos SVG.
+  // Reutiliza el motor (transitionTo/veil, fade-in, HUD, scrollTo) sin pasar por el layout
+  // de párrafos+choices. No hay #scene .body p, así que la lectura por scroll no interviene aquí.
+  if(s.creditos){
+    renderCredits(s);
+    return;
+  }
   // construir contenido
   var html='<p class="kicker">'+s.kicker+'</p><h2>'+s.titulo+'</h2><div class="body">'+s.texto.map(function(t){return '<p>'+t+'</p>';}).join('')+'</div>';
   if(s.reward){ resolved[s.track]=true; html+='<span class="reward">✦ '+s.reward+'</span>'; }
