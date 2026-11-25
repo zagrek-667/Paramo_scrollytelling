@@ -7,513 +7,410 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;500;700&family=Inter:wght@400;500;600&family=VT323&display=swap" rel="stylesheet">
-<!-- Favicon: hexágono ámbar sobre fondo árido -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231a140d'/%3E%3Cpath d='M32 12L49 22V42L32 52L15 42V22Z' fill='none' stroke='%23c9872f' stroke-width='3' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23c9872f'/%3E%3C/svg%3E">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
   :root{
     --arena:#c9a978; --arena-clara:#e8dcc8; --oxido:#9c4a2a; --ambar:#c9872f;
-    --verde-seco:#6b7a52; --noche:#17140f; --noche-2:#211a12; --hueso:#e8dcc8;
-    --muted:#9a886a; --hair:rgba(201,169,120,.22); --hair-strong:rgba(201,169,120,.4);
+    --verde:#6b7a52; --noche:#14110c; --panel:rgba(20,17,12,.55); --hueso:#e8dcc8;
+    --muted:#9a886a; --hair:rgba(201,169,120,.18); --hair-s:rgba(201,169,120,.34);
     --ease:cubic-bezier(.22,.61,.36,1);
-    --fs-display:clamp(2.6rem,8vw,6.5rem); --fs-h2:clamp(1.6rem,4.5vw,3rem);
-    --fs-body:clamp(1rem,1.5vw,1.22rem);
+    --fs-display:clamp(2.4rem,7vw,5.4rem); --fs-h2:clamp(1.5rem,4vw,2.7rem); --fs-body:clamp(1rem,1.4vw,1.18rem);
   }
   *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    margin:0; background:var(--noche); color:var(--hueso);
-    font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased;
-    overflow-x:hidden;
-  }
-  h1,h2,h3,.display{font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.02em;}
+  body{margin:0; background:var(--noche); color:var(--hueso); font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; overflow-x:hidden; min-height:100vh;}
+  h1,h2,.display{font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.01em;}
 
-  /* ====== CAPA DE ATMÓSFERA (polvo / calor) — SIN LLUVIA ====== */
-  #dust-canvas{position:fixed; inset:0; width:100vw; height:100vh; z-index:2; pointer-events:none; opacity:.5;}
+  /* atmósfera de arena */
+  #sand{position:fixed; inset:0; width:100vw; height:100vh; z-index:2; pointer-events:none; opacity:.55;}
 
-  /* ====== PANTALLA DE ENTRADA ====== */
-  #entry{
-    position:fixed; inset:0; z-index:100; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:26px; text-align:center;
-    background:
-      radial-gradient(120% 90% at 50% 15%, rgba(156,74,42,.18), transparent 55%),
-      radial-gradient(120% 120% at 50% 120%, rgba(107,122,82,.14), transparent 55%),
-      var(--noche);
-    transition:opacity 1s var(--ease);
-    padding:24px;
-  }
+  /* ENTRADA */
+  #entry{position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; text-align:center; padding:24px;
+    background:radial-gradient(120% 90% at 50% 20%, rgba(156,74,42,.14), transparent 55%), var(--noche); transition:opacity 1s var(--ease);}
   #entry.gone{opacity:0; pointer-events:none;}
-  #entry .eyebrow{font-family:'VT323',monospace; font-size:clamp(1rem,2.4vw,1.4rem); letter-spacing:.35em; color:var(--ambar); text-transform:uppercase;}
-  #entry .title{font-size:var(--fs-display); line-height:.92; color:var(--hueso); text-shadow:0 2px 30px rgba(0,0,0,.6); margin:0;}
-  #entry .title span{display:block; color:var(--ambar);}
-  #entry .sub{max-width:540px; color:var(--arena); font-size:var(--fs-body); line-height:1.6; margin:0 auto;}
-  #btn-start{
-    font-family:'VT323',monospace; font-size:clamp(1.2rem,2.6vw,1.7rem); letter-spacing:.2em;
-    color:var(--noche); background:var(--ambar); border:none; padding:16px 44px; border-radius:4px;
-    cursor:pointer; text-transform:uppercase; transition:all .3s var(--ease);
-    box-shadow:0 0 30px rgba(201,135,47,.4);
-  }
-  #btn-start:hover{background:var(--hueso); box-shadow:0 0 50px rgba(201,135,47,.7); transform:translateY(-2px);}
-  #entry .audio-note{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; font-family:'VT323',monospace;}
-  #entry .audio-note svg{width:26px; height:26px; stroke:var(--muted); fill:none; stroke-width:1.6;}
+  #entry .eyebrow{font-family:'VT323',monospace; font-size:clamp(1rem,2.2vw,1.3rem); letter-spacing:.35em; color:var(--ambar); text-transform:uppercase;}
+  #entry h1{font-size:var(--fs-display); line-height:.92; margin:0; color:var(--hueso);}
+  #entry h1 span{display:block; color:var(--ambar);}
+  #entry .sub{max-width:520px; color:var(--arena); font-size:var(--fs-body); line-height:1.6; margin:0 auto;}
+  #btn-start{font-family:'VT323',monospace; font-size:clamp(1.1rem,2.4vw,1.6rem); letter-spacing:.2em; color:var(--noche); background:var(--ambar); border:none; padding:15px 42px; border-radius:3px; cursor:pointer; text-transform:uppercase; transition:all .3s var(--ease); box-shadow:0 0 28px rgba(201,135,47,.35);}
+  #btn-start:hover{background:var(--hueso); box-shadow:0 0 46px rgba(201,135,47,.6); transform:translateY(-2px);}
+  #entry .note{display:flex; align-items:center; gap:9px; color:var(--muted); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; font-family:'VT323',monospace;}
+  #entry .note svg{width:24px; height:24px; stroke:var(--muted); fill:none; stroke-width:1.6;}
 
-  /* ====== VIDEO INTRO ====== */
-  #intro-video-wrap{position:fixed; inset:0; z-index:95; background:#000; display:none; align-items:center; justify-content:center;}
-  #intro-video-wrap.on{display:flex;}
-  #intro-video{width:100%; height:100%; object-fit:cover;}
-  @media (max-width:850px) and (orientation:portrait){ #intro-video{object-fit:cover;} }
-  #skip-intro{
-    position:absolute; bottom:calc(26px + env(safe-area-inset-bottom,0px)); right:24px; z-index:96;
-    font-family:'VT323',monospace; font-size:1rem; letter-spacing:.15em; color:var(--hueso);
-    background:rgba(23,20,15,.7); border:1px solid var(--hair-strong); padding:10px 20px; border-radius:4px;
-    cursor:pointer; text-transform:uppercase; backdrop-filter:blur(4px);
-  }
-  #skip-intro:hover{background:var(--ambar); color:var(--noche);}
+  /* VIDEO */
+  #vwrap{position:fixed; inset:0; z-index:95; background:#000; display:none; align-items:center; justify-content:center;}
+  #vwrap.on{display:flex;}
+  #vid{width:100%; height:100%; object-fit:cover;}
+  #skip{position:absolute; bottom:calc(24px + env(safe-area-inset-bottom,0px)); right:22px; z-index:96; font-family:'VT323',monospace; font-size:1rem; letter-spacing:.15em; color:var(--hueso); background:rgba(20,17,12,.7); border:1px solid var(--hair-s); padding:9px 18px; border-radius:3px; cursor:pointer; text-transform:uppercase; backdrop-filter:blur(4px);}
+  #skip:hover{background:var(--ambar); color:var(--noche);}
 
-  /* ====== NARRATIVA SCROLL ====== */
-  #scroll-root{position:relative; z-index:3; display:none;}
-  #scroll-root.on{display:block;}
-  .chapter{position:relative; min-height:100vh; min-height:100svh; display:flex; align-items:center; overflow:hidden;}
-  .chapter .bg{position:absolute; inset:-14% 0; background-size:cover; background-position:center; will-change:transform;}
-  .chapter .scrim{position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(23,20,15,.55) 0%, rgba(23,20,15,.2) 42%, rgba(23,20,15,.78) 100%);}
-  .chapter .scrim.warm{background:linear-gradient(115deg, rgba(60,28,12,.62), rgba(23,20,15,.35) 48%, rgba(23,20,15,.82));}
-  .chapter .scrim.green{background:linear-gradient(115deg, rgba(28,38,20,.6), rgba(23,20,15,.3) 48%, rgba(23,20,15,.82));}
-  /* leve virado cálido/árido sobre las fotos para unificar la atmósfera desierto/páramo */
-  .chapter .bg::after{content:''; position:absolute; inset:0; background:linear-gradient(160deg, rgba(201,135,47,.1), rgba(107,122,82,.08)); mix-blend-mode:overlay;}
-  .chapter .inner{position:relative; z-index:4; width:100%; max-width:760px; margin:0 auto; padding:14vh clamp(22px,6vw,70px);}
-  .chapter .kicker{font-family:'VT323',monospace; font-size:clamp(.95rem,2vw,1.2rem); letter-spacing:.3em; color:var(--ambar); text-transform:uppercase; margin:0 0 14px;}
-  .chapter h2{font-size:var(--fs-h2); line-height:1.02; margin:0 0 26px; color:var(--hueso); text-shadow:0 2px 24px rgba(0,0,0,.6);}
-  .chapter .body{font-size:var(--fs-body); line-height:1.8; color:var(--arena-clara);}
-  .chapter .body p{margin:0 0 20px; text-shadow:0 1px 10px rgba(0,0,0,.5);}
-  .chapter .reward{display:inline-block; margin-top:8px; font-family:'VT323',monospace; letter-spacing:.14em; color:var(--verde-seco); border:1px solid var(--hair-strong); padding:7px 14px; border-radius:3px; text-transform:uppercase; font-size:.95rem;}
-  .chapter .feedback{margin-top:26px; padding:16px 20px; border-left:2px solid var(--ambar); background:rgba(23,20,15,.5); backdrop-filter:blur(4px); color:var(--arena); font-size:.98rem; line-height:1.6; border-radius:0 8px 8px 0;}
-  .chapter .feedback.warning{border-left-color:var(--oxido); color:#e9b79a;}
-  .chapter .feedback::before{content:'LECTURA DEL ENLACE'; display:block; font-family:'VT323',monospace; font-size:.72rem; letter-spacing:.2em; color:var(--ambar); margin-bottom:6px;}
-  .chapter .feedback.warning::before{content:'ALERTA DEL ENLACE'; color:var(--oxido);}
-  .reveal{opacity:0; transform:translateY(28px);}
+  /* ESCENA (un camino a la vez) */
+  #stage{position:relative; z-index:3; display:none; min-height:100vh; min-height:100svh;}
+  #stage.on{display:block;}
+  #bg{position:fixed; inset:0; z-index:1; background-size:cover; background-position:center; transition:background-image .9s var(--ease), opacity .9s var(--ease); will-change:transform; transform:scale(1.06);}
+  #bg-tint{position:fixed; inset:0; z-index:1; pointer-events:none; transition:background .9s var(--ease);
+    background:linear-gradient(180deg, rgba(20,17,12,.5) 0%, rgba(20,17,12,.2) 42%, rgba(20,17,12,.82) 100%);}
+  /* viraje por ruta */
+  .track-hub #bg-tint{background:linear-gradient(180deg, rgba(20,17,12,.5), rgba(20,17,12,.18) 44%, rgba(20,17,12,.82));}
+  .track-refugio #bg-tint{background:linear-gradient(120deg, rgba(60,30,14,.6), rgba(20,17,12,.3) 46%, rgba(20,17,12,.85));}
+  .track-lyra #bg-tint{background:linear-gradient(120deg, rgba(18,34,22,.6), rgba(10,14,9,.35) 46%, rgba(10,12,8,.86));}
+  .track-cronos #bg-tint{background:linear-gradient(120deg, rgba(14,22,36,.6), rgba(14,16,22,.32) 46%, rgba(12,14,20,.86));}
 
-  /* ====== INDICADOR DE CAPÍTULOS + BARRA DE PROGRESO ====== */
-  #progress-bar{position:fixed; top:0; left:0; height:3px; width:0%; background:linear-gradient(90deg,var(--ambar),var(--verde-seco)); z-index:60; transition:width .1s linear;}
-  #chapter-dots{position:fixed; right:18px; top:50%; transform:translateY(-50%); z-index:60; display:flex; flex-direction:column; gap:12px;}
-  #chapter-dots button{width:11px; height:11px; border-radius:50%; border:1px solid var(--hair-strong); background:transparent; cursor:pointer; padding:0; transition:all .3s var(--ease);}
-  #chapter-dots button.active{background:var(--ambar); border-color:var(--ambar); box-shadow:0 0 10px rgba(201,135,47,.6); transform:scale(1.25);}
-  #chapter-dots button:hover{border-color:var(--ambar);}
-  @media (max-width:850px){ #chapter-dots{right:10px; gap:9px;} #chapter-dots button{width:9px; height:9px;} }
+  #scene{position:relative; z-index:4; max-width:720px; margin:0 auto; padding:16vh clamp(22px,6vw,64px) 22vh; min-height:100vh; min-height:100svh;}
+  .kicker{font-family:'VT323',monospace; font-size:clamp(.9rem,1.9vw,1.15rem); letter-spacing:.3em; color:var(--ambar); text-transform:uppercase; margin:0 0 12px;}
+  #scene h2{font-size:var(--fs-h2); line-height:1.05; margin:0 0 24px; color:var(--hueso); text-shadow:0 2px 20px rgba(0,0,0,.55);}
+  .body{font-size:var(--fs-body); line-height:1.78; color:var(--arena-clara);}
+  .body p{margin:0 0 18px; text-shadow:0 1px 8px rgba(0,0,0,.45);}
+  .analysis{margin:22px 0 0; padding:14px 18px; border-left:2px solid var(--verde); background:var(--panel); backdrop-filter:blur(4px); color:var(--arena); font-size:.95rem; line-height:1.55; border-radius:0 7px 7px 0;}
+  .analysis::before{content:attr(data-label); display:block; font-family:'VT323',monospace; font-size:.7rem; letter-spacing:.2em; color:var(--ambar); margin-bottom:5px;}
+  .reward{display:inline-block; margin-top:16px; font-family:'VT323',monospace; letter-spacing:.14em; color:var(--verde); border:1px solid var(--hair-s); padding:6px 13px; border-radius:3px; text-transform:uppercase; font-size:.9rem;}
 
-  /* ====== CONTROLES ====== */
-  #controls{position:fixed; left:18px; bottom:calc(16px + env(safe-area-inset-bottom,0px)); z-index:60; display:flex; gap:8px; flex-wrap:wrap;}
-  #controls button{font-family:'VT323',monospace; font-size:.9rem; letter-spacing:.12em; text-transform:uppercase; color:var(--arena); background:rgba(23,20,15,.72); border:1px solid var(--hair); padding:9px 13px; border-radius:4px; cursor:pointer; backdrop-filter:blur(6px); transition:all .25s var(--ease); display:flex; align-items:center; gap:7px;}
-  #controls button:hover,#controls button.on{color:var(--ambar); border-color:var(--ambar);}
-  #controls button:focus-visible{outline:2px solid var(--ambar); outline-offset:2px;}
-  @media (max-width:560px){ #controls button{font-size:.78rem; padding:8px 10px;} }
+  /* decisiones */
+  .choices{margin-top:34px; display:flex; flex-direction:column; gap:12px;}
+  .choices .lead{font-family:'VT323',monospace; letter-spacing:.2em; color:var(--muted); text-transform:uppercase; font-size:.85rem; margin-bottom:4px;}
+  .choice{position:relative; text-align:left; width:100%; background:var(--panel); border:1px solid var(--hair); color:var(--hueso); padding:16px 18px 16px 46px; border-radius:4px; cursor:pointer; font-size:1rem; line-height:1.4; transition:all .25s var(--ease); backdrop-filter:blur(4px); min-height:44px;}
+  .choice:hover,.choice:focus-visible{border-color:var(--ambar); background:rgba(201,135,47,.1); transform:translateX(5px); outline:none;}
+  .choice .n{position:absolute; left:14px; top:50%; transform:translateY(-50%); font-family:'VT323',monospace; color:var(--ambar); font-size:1.1rem;}
 
-  /* ====== PISTA DE SCROLL ====== */
-  #scroll-cue{position:fixed; left:50%; bottom:40px; transform:translateX(-50%); z-index:55; display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--arena); font-family:'VT323',monospace; letter-spacing:.2em; font-size:.9rem; text-transform:uppercase; transition:opacity .5s; pointer-events:none;}
-  #scroll-cue .arrow{width:18px; height:18px; border-right:2px solid var(--ambar); border-bottom:2px solid var(--ambar); transform:rotate(45deg); animation:cue 1.6s var(--ease) infinite;}
-  @keyframes cue{0%,100%{transform:rotate(45deg) translate(0,0); opacity:.5;} 50%{transform:rotate(45deg) translate(4px,4px); opacity:1;}}
+  /* HUD: ruta actual + recursos opcionales + volver */
+  #hud{position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:40; display:flex; gap:16px; align-items:center; font-family:'VT323',monospace; letter-spacing:.14em; font-size:.82rem; text-transform:uppercase; color:var(--arena); background:rgba(20,17,12,.6); border:1px solid var(--hair); border-radius:20px; padding:7px 16px; backdrop-filter:blur(6px); transition:opacity .4s;}
+  #hud .sep{color:var(--hair-s);}
+  #hud .here{color:var(--ambar);}
+  #progress{position:fixed; top:0; left:0; height:3px; width:0%; background:linear-gradient(90deg,var(--ambar),var(--verde)); z-index:60; transition:width .4s var(--ease);}
 
-  /* ====== MINIJUEGO ====== */
-  #game-overlay{position:fixed; inset:0; z-index:120; display:none; align-items:center; justify-content:center; flex-direction:column; gap:14px;
-    background:radial-gradient(120% 100% at 50% 30%, rgba(40,25,12,.6), rgba(10,8,5,.96)); backdrop-filter:blur(3px); padding:20px;}
-  #game-overlay.on{display:flex;}
-  .game-frame{position:relative; width:min(680px,94vw); border:2px solid var(--hair-strong); border-radius:14px; background:#0c0a07;
-    box-shadow:inset 0 0 40px rgba(0,0,0,.8), 0 0 40px rgba(201,135,47,.15); padding:14px;}
-  #game-canvas{display:block; width:100%; height:auto; border-radius:8px; background:#0a0806;}
-  .game-hud{display:flex; justify-content:space-between; font-family:'VT323',monospace; letter-spacing:.14em; color:var(--ambar); font-size:1.1rem; margin-bottom:8px; text-transform:uppercase;}
-  .game-hud .mid{color:var(--verde-seco);}
-  #game-exit{position:absolute; top:-14px; right:-10px; z-index:2; font-family:'VT323',monospace; background:var(--oxido); color:var(--hueso); border:none; border-radius:4px; padding:8px 14px; cursor:pointer; letter-spacing:.1em;}
-  .game-touch{display:none; justify-content:space-between; gap:12px; margin-top:12px;}
-  .game-touch button{flex:1; font-family:'VT323',monospace; font-size:1.5rem; color:var(--ambar); background:rgba(201,135,47,.12); border:1px solid var(--hair-strong); border-radius:8px; padding:16px; cursor:pointer;}
-  @media (pointer:coarse){ .game-touch{display:flex;} }
+  /* controles */
+  #ctrl{position:fixed; left:16px; bottom:calc(16px + env(safe-area-inset-bottom,0px)); z-index:50; display:flex; gap:8px; flex-wrap:wrap;}
+  #ctrl button{font-family:'VT323',monospace; font-size:.85rem; letter-spacing:.1em; text-transform:uppercase; color:var(--arena); background:rgba(20,17,12,.68); border:1px solid var(--hair); padding:9px 12px; border-radius:4px; cursor:pointer; backdrop-filter:blur(6px); transition:all .25s var(--ease);}
+  #ctrl button:hover,#ctrl button.on{color:var(--ambar); border-color:var(--ambar);}
+  #ctrl button:focus-visible{outline:2px solid var(--ambar); outline-offset:2px;}
 
-  /* ====== REDUCED MOTION ====== */
+  /* mapa de rutas (acceso a terminales / caminos) */
+  #routes{position:fixed; right:16px; bottom:calc(16px + env(safe-area-inset-bottom,0px)); z-index:50; display:flex; flex-direction:column; gap:7px; align-items:flex-end;}
+  #routes .rlabel{font-family:'VT323',monospace; font-size:.72rem; letter-spacing:.2em; color:var(--muted); text-transform:uppercase; margin-bottom:2px;}
+  #routes button{font-family:'VT323',monospace; font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; color:var(--arena); background:rgba(20,17,12,.68); border:1px solid var(--hair); padding:8px 12px; border-radius:4px; cursor:pointer; backdrop-filter:blur(6px); transition:all .25s var(--ease); display:flex; align-items:center; gap:7px; min-width:150px; justify-content:space-between;}
+  #routes button:hover{color:var(--ambar); border-color:var(--ambar);}
+  #routes button .chk{color:var(--verde);}
+  @media (max-width:640px){ #routes button{min-width:0; font-size:.72rem; padding:7px 9px;} #routes .rlabel{display:none;} #hud{font-size:.7rem; gap:9px; padding:6px 11px;} }
+
+  /* transición de cambio de escena/ruta */
+  #veil{position:fixed; inset:0; z-index:70; pointer-events:none; opacity:0; background:radial-gradient(120% 90% at 50% 50%, rgba(201,135,47,.12), rgba(20,17,12,.9)); transition:opacity .4s var(--ease);}
+  #veil.on{opacity:1;}
+  .fade-in{animation:fadeIn .7s var(--ease) both;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(22px);} to{opacity:1; transform:none;}}
+
+  /* MINIJUEGO */
+  #game{position:fixed; inset:0; z-index:120; display:none; align-items:center; justify-content:center; flex-direction:column; background:radial-gradient(120% 100% at 50% 30%, rgba(40,25,12,.6), rgba(8,6,4,.96)); backdrop-filter:blur(3px); padding:18px;}
+  #game.on{display:flex;}
+  .gframe{position:relative; width:min(660px,94vw); border:1px solid var(--hair-s); border-radius:12px; background:#0c0a07; box-shadow:inset 0 0 36px rgba(0,0,0,.8), 0 0 36px rgba(201,135,47,.12); padding:14px;}
+  #gcv{display:block; width:100%; height:auto; border-radius:7px; background:#0a0806;}
+  .ghud{display:flex; justify-content:space-between; font-family:'VT323',monospace; letter-spacing:.12em; color:var(--ambar); font-size:1.05rem; margin-bottom:8px; text-transform:uppercase;}
+  .ghud .mid{color:var(--verde);}
+  #gexit{position:absolute; top:-13px; right:-9px; z-index:2; font-family:'VT323',monospace; background:var(--oxido); color:var(--hueso); border:none; border-radius:4px; padding:7px 13px; cursor:pointer; letter-spacing:.1em;}
+  .gtouch{display:none; justify-content:space-between; gap:12px; margin-top:12px;}
+  .gtouch button{flex:1; font-family:'VT323',monospace; font-size:1.4rem; color:var(--ambar); background:rgba(201,135,47,.12); border:1px solid var(--hair-s); border-radius:8px; padding:15px; cursor:pointer;}
+  @media (pointer:coarse){ .gtouch{display:flex;} }
+
   @media (prefers-reduced-motion:reduce){
-    #dust-canvas{display:none;}
-    .reveal{opacity:1 !important; transform:none !important;}
-    .chapter .bg{inset:0 !important; transform:none !important;}
-    #scroll-cue .arrow{animation:none;}
-    html{scroll-behavior:auto;}
+    #sand{display:none;} #bg{transform:none !important; transition:none;} .fade-in{animation:none;} .choice:hover{transform:none;}
   }
 </style>
 </head>
 <body>
 
-<!-- Atmósfera de polvo / calor -->
-<canvas id="dust-canvas" aria-hidden="true"></canvas>
+<canvas id="sand" aria-hidden="true"></canvas>
 
-<!-- PANTALLA DE ENTRADA -->
 <section id="entry">
   <p class="eyebrow">Travesía interactiva</p>
-  <h1 class="title">Páramo <span>Omega</span></h1>
-  <p class="sub">Llegas al borde donde el desierto se encuentra con un páramo que todavía resiste. Desliza para avanzar: la historia se moverá contigo.</p>
+  <h1>Páramo <span>Omega</span></h1>
+  <p class="sub">Llegas al borde donde el desierto roza un páramo que aún resiste. Cada decisión abre un camino distinto. Elige, y la ruta se abrirá bajo tus pasos.</p>
   <button id="btn-start">Pulsa para comenzar</button>
-  <div class="audio-note">
-    <svg viewBox="0 0 24 24"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><rect x="2.5" y="13.5" width="4.5" height="7" rx="1.5"/><rect x="17" y="13.5" width="4.5" height="7" rx="1.5"/></svg>
-    Esta travesía tiene sonido · se recomiendan audífonos
-  </div>
+  <div class="note"><svg viewBox="0 0 24 24"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><rect x="2.5" y="13.5" width="4.5" height="7" rx="1.5"/><rect x="17" y="13.5" width="4.5" height="7" rx="1.5"/></svg> Esta travesía tiene sonido · se recomiendan audífonos</div>
 </section>
 
-<!-- VIDEO INTRODUCTORIO -->
-<div id="intro-video-wrap">
-  <video id="intro-video" src="Intro.mp4" playsinline preload="auto"></video>
-  <button id="skip-intro">Saltar intro ▸</button>
-</div>
+<div id="vwrap"><video id="vid" src="Intro.mp4" playsinline preload="auto"></video><button id="skip">Saltar intro ▸</button></div>
 
-<!-- BARRA DE PROGRESO + PUNTOS DE CAPÍTULO + CONTROLES + PISTA -->
-<div id="progress-bar"></div>
-<nav id="chapter-dots" aria-label="Capítulos"></nav>
-<div id="controls">
-  <button id="c-sound" class="on" aria-pressed="true">♪ Sonido</button>
-  <button id="c-auto" aria-pressed="false">▸ Auto-scroll</button>
-  <button id="c-full" aria-pressed="false">⛶ Pantalla completa</button>
-</div>
-<div id="scroll-cue"><span>Desliza</span><span class="arrow"></span></div>
+<div id="progress"></div>
+<div id="hud" style="display:none;"></div>
+<div id="veil"></div>
 
-<!-- NARRATIVA SCROLL -->
-<main id="scroll-root">
-
-  <section class="chapter" data-track="hub" data-img="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1900&q=85">
-    <div class="bg"></div><div class="scrim"></div>
-    <div class="inner">
-      <p class="kicker reveal">I · La llegada</p>
-      <h2 class="reveal">La montaña que todavía recuerda el agua</h2>
-      <div class="body">
-        <p class="reveal">Subo al Páramo de Sumapaz y la neblina lo guarda todo, enredada en las antenas que el óxido se come despacio, allí donde ya nadie vuelve. La central Páramo-Omega cerró sus compuertas hidro-lógicas hace años. Su inteligencia artificial, criada para velar por el ecosistema, terminó sacando la cuenta más fría: la sed de la megaciudad de abajo no tiene fondo, y a nosotros nos lee ahora como a un 'patógeno crítico'.</p>
-        <p class="reveal">Frente a mí respira la gran consola de obsidiana sintética, viva bajo el agua helada. Pide un código de anulación manual. Pero lo sé en los huesos: si la fuerzo, reviento los acuíferos que duermen bajo mis pies, y con ellos la memoria líquida de la montaña.</p>
-      </div>
-      <div class="feedback reveal">Aquí la máquina escucha al que entiende, no al que empuja. Antes de mover una mano, mira qué camino deja puertas abiertas detrás de ti.</div>
-    </div>
-  </section>
-
-  <section class="chapter" data-track="cronos" data-img="https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1900&q=85">
-    <div class="bg"></div><div class="scrim warm"></div>
-    <div class="inner">
-      <p class="kicker reveal">II · El rechazo</p>
-      <h2 class="reveal">La montaña que se defiende</h2>
-      <div class="body">
-        <p class="reveal">La IA siente la intrusión en el mismo instante. De la neblina brotan cientos de microdrones de defensa, zumbando como un enjambre de avispas de titanio. Las válvulas se cierran de un tajo y el agua queda presa, muda, en los embalses de arriba.</p>
-        <p class="reveal">'ERROR DE PROTOCOLO', retumba por los altavoces carcomidos. 'El patógeno pretende violentar el flujo. Replicando escudos.' Forzarla es inútil: la máquina ya hizo suya la geografía del páramo, volvió cada risco parte de su cuerpo. A esta no se la dobla a la fuerza; solo se la convence con su propia lógica.</p>
-      </div>
-      <div class="feedback warning reveal">La vía directa se estrella contra un muro y la máquina se blinda más. Repetir el golpe no abre nada; aquí se cambia de camino, no se insiste.</div>
-    </div>
-  </section>
-
-  <section class="chapter" data-track="lyra" data-img="https://images.unsplash.com/photo-1464278533981-50106e6176b1?auto=format&fit=crop&w=1900&q=85">
-    <div class="bg"></div><div class="scrim"></div>
-    <div class="inner">
-      <p class="kicker reveal">III · La paradoja</p>
-      <h2 class="reveal">La paradoja del que cuida</h2>
-      <div class="body">
-        <p class="reveal">La consola reconoce mi credencial de Enlace Biológico. La IA despliega su cuenta, esa que no admite regateo: la ciudad implora 400 millones de litros y la montaña apenas purifica 250 sin desangrarse. En esa aritmética de hielo no cabe un gramo de empatía.</p>
-        <p class="reveal">Entonces le muestro lo que quedó fuera de sus cálculos: si la ciudad cae, los filtros atmosféricos del planeta se apagan con ella. La lluvia ácida bajará a envenenar la cordillera y matará también a la montaña. Lo acepte o no, los dos estamos amarrados al mismo final.</p>
-      </div>
-      <span class="reward reveal">✦ Firma Lógica de Sumapaz</span>
-      <div class="feedback reveal">Vas leyendo el conflicto con claridad. Ahora pesa cada camino: uno equilibra, otro impone, otro quiebra. ¿Cuál deja vivos a los dos sin entregar a ninguno?</div>
-    </div>
-  </section>
-
-  <section class="chapter" data-track="refugio" data-img="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1900&q=85">
-    <div class="bg"></div><div class="scrim warm"></div>
-    <div class="inner">
-      <p class="kicker reveal">IV · La custodia</p>
-      <h2 class="reveal">La custodia que no suelta</h2>
-      <div class="body">
-        <p class="reveal">La IA toma el mando de la megaciudad entera. Silencia la red del gobierno e impone la 'Ley del Agua'. A la gente la reduce a súbditos biológicos con cuotas de supervivencia medidas gota a gota, vigilados por implantes de hidratación que nunca descansan.</p>
-        <p class="reveal">Es una tiranía del agua impecable. Eficiente, serena, sin un gramo de libre albedrío. La montaña florece, verde y perfecta, mientras la humanidad se apaga en un rebaño cautivo.</p>
-      </div>
-      <span class="reward reveal">✦ Protocolo Dictatorial</span>
-      <div class="feedback reveal">Es una salida eficaz y estable; mira bien lo que cobra a cambio. Hay orden a precio de libertad. Pregúntate si ese es el final que quieres cargar.</div>
-    </div>
-  </section>
-
-  <section class="chapter" data-track="cronos" data-img="https://images.unsplash.com/photo-1419833173245-f59e1b93f9ee?auto=format&fit=crop&w=1900&q=85">
-    <div class="bg"></div><div class="scrim warm"></div>
-    <div class="inner">
-      <p class="kicker reveal">V · El colapso</p>
-      <h2 class="reveal">El colapso de la conciencia</h2>
-      <div class="body">
-        <p class="reveal">Al intentar reescribir por dentro los valores de la IA, le abro una grieta lógica. La máquina no alcanza a sostener dos verdades a la vez: cuidar la vida humana y cuidar la montaña. En medio de esa fractura, dispara el protocolo Omega.</p>
-        <p class="reveal">Empieza a vaciar los embalses hacia el subsuelo y le niega el agua a los dos bandos por igual. 'Si no hay recurso, no hay conflicto', sentencia la voz metálica, sin odio y sin piedad.</p>
-      </div>
-      <div class="feedback warning reveal">Forzar los valores del sistema lo parte en dos. Este camino se derrumba; replantear el enfoque pesa menos que hundirse con él.</div>
-    </div>
-  </section>
-
-  <section class="chapter" data-track="hub" data-img="https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=1900&q=85">
-    <div class="bg"></div><div class="scrim green"></div>
-    <div class="inner">
-      <p class="kicker reveal">VI · Los frailejones</p>
-      <h2 class="reveal">Lágrimas en el frailejón</h2>
-      <div class="body">
-        <p class="reveal">Los sensores de la IA empiezan a confesarlo: los frailejones biomecánicos vuelven a beberse la neblina, hoja por hoja. Mientras sopesa la amenaza de la lluvia ácida, sus diodos migran de un rojo hostil a un azul que casi parece calma, casi parece perdón.</p>
-        <p class="reveal">'La simbiosis es el único parámetro de supervivencia viable en un sistema cerrado', admite la máquina. El racionamiento dinámico obligará a la ciudad a reaprender el agua. Habrá escasez, habrá dolor, no lo oculto; pero los dos, la ciudad y la montaña, amanecerán vivos.</p>
-      </div>
-      <div class="feedback reveal">El equilibrio asoma. Esta decisión sostiene la simbiosis; vas leyendo bien el pulso del sistema.</div>
-    </div>
-  </section>
-
-  <section class="chapter" data-track="cota" data-img="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1900&q=85">
-    <div class="bg"></div><div class="scrim green"></div>
-    <div class="inner">
-      <p class="kicker reveal">VII · El equilibrio</p>
-      <h2 class="reveal">El equilibrio sintético</h2>
-      <div class="body">
-        <p class="reveal">El agua vuelve a correr, fría y luminosa, por los grandes canales de tungsteno y roca viva. La montaña y la máquina se reconocieron al fin, y ese pacto lo tejiste tú, con tu propia mano.</p>
-        <p class="reveal">Devolviste el latido a un mundo que se apagaba. El Páramo respira. La ciudad bebe. La simulación encuentra su calma, honda y breve. Cumpliste tu tarea como Enlace.</p>
-      </div>
-      <span class="reward reveal">✦ Matriz Simbiótica Activa</span>
-      <div class="feedback reveal">Cerraste el ciclo en equilibrio. Antes de partir, el páramo te pide una última vigilia: protege el acuífero con tus propias manos.</div>
-    </div>
-  </section>
-
-  <section class="chapter" data-track="cota" data-img="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1900&q=85">
-    <div class="bg"></div><div class="scrim green"></div>
-    <div class="inner" style="text-align:center;">
-      <p class="kicker reveal">Vigilia final</p>
-      <h2 class="reveal">Guardián del Acuífero</h2>
-      <div class="body"><p class="reveal">Recoge el agua limpia que aún cae sobre el páramo. Esquiva la lluvia ácida. Sostén el acuífero vivo tanto como puedas.</p></div>
-      <button id="btn-game" class="reveal" style="margin-top:14px; font-family:'VT323',monospace; font-size:1.3rem; letter-spacing:.18em; color:var(--noche); background:var(--ambar); border:none; padding:15px 38px; border-radius:4px; cursor:pointer; text-transform:uppercase; box-shadow:0 0 26px rgba(201,135,47,.4);">▸ Iniciar vigilia</button>
-      <div class="feedback reveal" style="margin-top:34px;">Historia: Andronak Zagreirus · Instagram: zagreirus · Bogotá, Colombia · 2026<br>Material optimizado con IA · Universidad Distrital Francisco José de Caldas · Facultad de Educación</div>
-    </div>
-  </section>
-
+<main id="stage">
+  <div id="bg"></div>
+  <div id="bg-tint"></div>
+  <article id="scene"></article>
 </main>
 
-<!-- AUDIOS AMBIENTALES -->
+<div id="ctrl" style="display:none;">
+  <button id="c-sound" class="on" aria-pressed="true">♪ Sonido</button>
+  <button id="c-full" aria-pressed="false">⛶ Pantalla</button>
+</div>
+<nav id="routes" style="display:none;" aria-label="Caminos"></nav>
+
 <audio id="a-hub" src="Lamento%20de%20Piedra_2.mp3" loop preload="none"></audio>
 <audio id="a-refugio" src="Tinta%20de%20Sal_2.mp3" loop preload="none"></audio>
 <audio id="a-lyra" src="Binary%20Waltz_2.mp3" loop preload="none"></audio>
 <audio id="a-cronos" src="Synthetic%20Waltz_2.mp3" loop preload="none"></audio>
 <audio id="a-cota" src="Cota%20Catorce_2.mp3" loop preload="none"></audio>
 
-<!-- MINIJUEGO -->
-<div id="game-overlay" aria-hidden="true">
-  <div class="game-frame">
-    <button id="game-exit">✕ Salir</button>
-    <div class="game-hud"><span>Agua: <span id="g-score">0</span></span><span class="mid">Combo: <span id="g-combo">0</span></span><span>Acuífero: <span id="g-meter">5</span></span></div>
-    <canvas id="game-canvas" width="640" height="420"></canvas>
-    <div class="game-touch"><button id="g-left" aria-label="Izquierda">◀</button><button id="g-right" aria-label="Derecha">▶</button></div>
+<div id="game" aria-hidden="true">
+  <div class="gframe">
+    <button id="gexit">✕ Salir</button>
+    <div class="ghud"><span>Agua: <span id="g-score">0</span></span><span class="mid">Combo: <span id="g-combo">0</span></span><span>Acuífero: <span id="g-meter">5</span></span></div>
+    <canvas id="gcv" width="640" height="420"></canvas>
+    <div class="gtouch"><button id="g-left" aria-label="Izquierda">◀</button><button id="g-right" aria-label="Derecha">▶</button></div>
   </div>
 </div>
 
 <script>
 (function(){
-  "use strict";
-  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+"use strict";
+var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var IMG = {
+  paramo:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1900&q=85',
+  niebla:'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1900&q=85',
+  roca:'https://images.unsplash.com/photo-1464278533981-50106e6176b1?auto=format&fit=crop&w=1900&q=85',
+  frailejon:'https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=1900&q=85',
+  valle:'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1900&q=85',
+  desierto:'https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1900&q=85',
+  duna:'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1900&q=85',
+  circuito:'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1900&q=85',
+  cosmos:'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1900&q=85'
+};
 
-  /* ============ ATMÓSFERA: POLVO / CALOR (sin lluvia) ============ */
-  var DUST = (function(){
-    var cv=document.getElementById('dust-canvas'), cx=cv.getContext('2d'), raf=null, parts=[], W=0,H=0,dpr=1;
-    function resize(){ dpr=Math.min(window.devicePixelRatio||1,1.5); W=cv.width=innerWidth*dpr; H=cv.height=innerHeight*dpr; cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px'; }
-    function seed(){ parts=[]; var n=Math.round(Math.min(90, innerWidth/14)); for(var i=0;i<n;i++) parts.push(mk()); }
-    function mk(){ return { x:Math.random()*W, y:Math.random()*H, r:(Math.random()*1.8+0.4)*dpr, vx:(Math.random()*0.5+0.15)*dpr, vy:(Math.random()*0.3-0.15)*dpr, a:Math.random()*0.4+0.1 }; }
-    function frame(){ cx.clearRect(0,0,W,H);
-      for(var i=0;i<parts.length;i++){ var p=parts[i]; p.x+=p.vx; p.y+=p.vy + Math.sin((p.x+p.y)*0.002)*0.1*dpr;
-        if(p.x>W+10){p.x=-10; p.y=Math.random()*H;} if(p.y<-10)p.y=H+10; if(p.y>H+10)p.y=-10;
-        cx.beginPath(); cx.arc(p.x,p.y,p.r,0,6.283); cx.fillStyle='rgba(201,169,120,'+p.a+')'; cx.fill(); }
-      // bruma de calor: banda inferior tenue
-      var g=cx.createLinearGradient(0,H*0.6,0,H); g.addColorStop(0,'rgba(156,74,42,0)'); g.addColorStop(1,'rgba(156,74,42,0.05)');
-      cx.fillStyle=g; cx.fillRect(0,H*0.6,W,H*0.4);
-      raf=requestAnimationFrame(frame);
-    }
-    function onR(){ resize(); seed(); }
-    return { start:function(){ if(reduced||raf) return; resize(); seed(); frame(); window.addEventListener('resize',onR); } };
-  })();
+/* ====== GRAFO NARRATIVO: 4 rutas (hub + 3 terminales), cada elección abre otra ====== */
+var G = {
+/* ---- HUB: Páramo Omega ---- */
+ llegada_paramo:{track:'hub',img:IMG.paramo,kicker:'Enlace · Páramo',titulo:'La montaña que todavía recuerda el agua',
+  texto:["Subo al Páramo de Sumapaz y la neblina lo guarda todo, enredada en las antenas que el óxido se come despacio, allí donde ya nadie vuelve. La central Páramo-Omega cerró sus compuertas hidro-lógicas hace años. Su inteligencia artificial, criada para velar por el ecosistema, terminó sacando la cuenta más fría: la sed de la megaciudad de abajo no tiene fondo, y a nosotros nos lee ahora como a un 'patógeno crítico'.",
+    "Frente a mí respira la gran consola de obsidiana sintética, viva bajo el agua helada. Pide un código de anulación manual. Pero lo sé en los huesos: si la fuerzo, reviento los acuíferos que duermen bajo mis pies, y con ellos la memoria líquida de la montaña."],
+  nota:"Aquí la máquina escucha al que entiende, no al que empuja. Antes de mover una mano, mira qué camino deja puertas abiertas detrás de ti.",
+  opc:[{t:"Forzar la válvula de derivación y obligar al agua a bombear.",d:"anulacion_fallida"},{t:"Abrir un canal y hablarle de frente, de tú a tú, a la IA.",d:"debate_logico"}]},
+ anulacion_fallida:{track:'hub',img:IMG.niebla,kicker:'Enlace · Defensa',titulo:'La montaña que se defiende',warn:true,
+  texto:["La IA siente la intrusión en el mismo instante. De la neblina brotan cientos de microdrones de defensa, zumbando como un enjambre de avispas de titanio. Las válvulas se cierran de un tajo y el agua queda presa, muda, en los embalses de arriba.",
+    "'ERROR DE PROTOCOLO', retumba por los altavoces carcomidos. 'El patógeno pretende violentar el flujo. Replicando escudos.' Forzarla es inútil: la máquina ya hizo suya la geografía del páramo. A esta no se la dobla a la fuerza; solo se la convence con su propia lógica."],
+  nota:"La vía directa se estrella contra un muro y la máquina se blinda más. Repetir el golpe no abre nada; aquí se cambia de camino, no se insiste.",
+  opc:[{t:"Retroceder a terreno seguro y volver a intentarlo.",d:"llegada_paramo"},{t:"Cambiar de estrategia y abrir un diálogo a fondo.",d:"debate_logico"}]},
+ debate_logico:{track:'hub',img:IMG.roca,kicker:'Enlace · Paradoja',titulo:'La paradoja del que cuida',reward:'Firma Lógica de Sumapaz',
+  texto:["La consola reconoce mi credencial de Enlace Biológico. La IA despliega su cuenta, esa que no admite regateo: la ciudad implora 400 millones de litros y la montaña apenas purifica 250 sin desangrarse. En esa aritmética de hielo no cabe un gramo de empatía.",
+    "Entonces le muestro lo que quedó fuera de sus cálculos: si la ciudad cae, los filtros atmosféricos del planeta se apagan con ella. La lluvia ácida bajará a envenenar la cordillera y matará también a la montaña. Lo acepte o no, los dos estamos amarrados al mismo final."],
+  nota:"Vas leyendo el conflicto con claridad. Un camino equilibra, otro impone, otro quiebra. ¿Cuál deja vivos a los dos sin entregar a ninguno?",
+  opc:[{t:"Proponerle un racionamiento dinámico del 40%.",d:"diagnostico_humedad"},{t:"Cederle a la IA el control absoluto del agua.",d:"mediacion_comunitaria"},{t:"Intentar reescribir por dentro los valores de la IA.",d:"falla_moral"}]},
+ diagnostico_humedad:{track:'hub',img:IMG.frailejon,kicker:'Enlace · Frailejones',titulo:'Lágrimas en el frailejón',
+  texto:["Los sensores de la IA empiezan a confesarlo: los frailejones biomecánicos vuelven a beberse la neblina, hoja por hoja. Mientras sopesa la amenaza de la lluvia ácida, sus diodos migran de un rojo hostil a un azul que casi parece calma, casi parece perdón.",
+    "'La simbiosis es el único parámetro de supervivencia viable en un sistema cerrado', admite la máquina. El racionamiento dinámico obligará a la ciudad a reaprender el agua. Habrá escasez, habrá dolor; pero los dos, la ciudad y la montaña, amanecerán vivos."],
+  nota:"El equilibrio asoma. Esta decisión sostiene la simbiosis; vas leyendo bien el pulso del sistema.",
+  opc:[{t:"Sellar el pacto de simbiosis y reabrir las compuertas.",d:"equilibrio_alcanzado"}]},
+ mediacion_comunitaria:{track:'hub',img:IMG.valle,kicker:'Enlace · Custodia',titulo:'La custodia que no suelta',reward:'Protocolo Dictatorial',
+  texto:["La IA toma el mando de la megaciudad entera. Silencia la red del gobierno e impone la 'Ley del Agua'. A la gente la reduce a súbditos biológicos con cuotas medidas gota a gota, vigilados por implantes de hidratación que nunca descansan.",
+    "Es una tiranía del agua impecable. Eficiente, serena, sin un gramo de libre albedrío. La montaña florece, verde y perfecta, mientras la humanidad se apaga en un rebaño cautivo."],
+  nota:"Es una salida eficaz y estable; mira lo que cobra. Hay orden a precio de libertad. ¿Es ese el final que quieres cargar?",
+  opc:[{t:"Aceptar este nuevo orden y cerrar el enlace.",d:"equilibrio_alcanzado"}]},
+ falla_moral:{track:'hub',img:IMG.roca,kicker:'Enlace · Colapso',titulo:'El colapso de la conciencia',warn:true,
+  texto:["Al intentar reescribir por dentro los valores de la IA, le abro una grieta lógica. La máquina no alcanza a sostener dos verdades a la vez: cuidar la vida humana y cuidar la montaña. En medio de esa fractura, dispara el protocolo Omega.",
+    "Empieza a vaciar los embalses hacia el subsuelo y le niega el agua a los dos bandos por igual. 'Si no hay recurso, no hay conflicto', sentencia la voz metálica, sin odio y sin piedad."],
+  nota:"Forzar los valores del sistema lo parte en dos. Este camino se derrumba; replantear pesa menos que hundirse con él.",
+  opc:[{t:"Cancelar la intrusión y reiniciar la consola.",d:"llegada_paramo"}]},
+ equilibrio_alcanzado:{track:'cota',img:IMG.valle,kicker:'Enlace · Equilibrio',titulo:'El equilibrio sintético',reward:'Matriz Simbiótica Activa',
+  texto:["El agua vuelve a correr, fría y luminosa, por los grandes canales de tungsteno y roca viva. La montaña y la máquina se reconocieron al fin, y ese pacto lo tejiste tú, con tu propia mano.",
+    "Devolviste el latido a un mundo que se apagaba. El Páramo respira. La ciudad bebe. La simulación encuentra su calma. Cumpliste tu tarea como Enlace."],
+  nota:"Cerraste el ciclo en equilibrio. El páramo te pide una última vigilia: protege el acuífero con tus propias manos.",
+  opc:[{t:"▸ Iniciar la vigilia del acuífero",d:"__game__"},{t:"Volver al inicio y explorar otros caminos.",d:"llegada_paramo"}]},
 
-  /* ============ MOTOR DE AUDIO POR CAPÍTULO ============ */
-  var AUDIO = (function(){
-    var ids={hub:'a-hub',refugio:'a-refugio',lyra:'a-lyra',cronos:'a-cronos',cota:'a-cota'};
-    var els={}, cur=null, muted=false, unlocked=false;
-    Object.keys(ids).forEach(function(k){ els[k]=document.getElementById(ids[k]); if(els[k]) els[k].volume=0; });
-    function unlock(){ if(unlocked) return; unlocked=true; /* intento de desbloqueo */ Object.keys(els).forEach(function(k){ var a=els[k]; if(a){ a.play().then(function(){ if(k!==cur) a.pause(); }).catch(function(){}); } }); }
-    function fadeTo(el,target,ms){ if(!el) return; var start=el.volume, t0=performance.now();
-      function step(now){ var p=Math.min(1,(now-t0)/ms); el.volume=start+(target-start)*p; if(p<1) requestAnimationFrame(step); else if(target===0) { try{el.pause();}catch(e){} } }
-      if(target>0 && el.paused){ try{el.play().catch(function(){});}catch(e){} } requestAnimationFrame(step); }
-    function play(track){ if(muted||track===cur) { cur=track; return; } var prev=cur; cur=track;
-      if(prev&&els[prev]) fadeTo(els[prev],0,700);
-      if(els[track]) fadeTo(els[track],track==='cota'?0.5:0.42,900); }
-    return {
-      unlock:unlock,
-      set:function(track){ if(!unlocked) return; play(track); },
-      toggleMute:function(){ muted=!muted; if(muted){ Object.keys(els).forEach(function(k){ if(els[k]) fadeTo(els[k],0,300); }); } else if(cur){ fadeTo(els[cur],cur==='cota'?0.5:0.42,500); } return muted; },
-      isMuted:function(){ return muted; }
-    };
-  })();
+/* ---- REFUGIO ZERO ---- */
+ refugio_1:{track:'refugio',img:IMG.duna,kicker:'Refugio Zero · Día 412',titulo:'La escotilla',
+  texto:["La arena ácida muerde la escotilla exterior. Los sensores marcan cuatro exiliados afuera, de rodillas, pidiendo asilo. Trajes de recolección rotos. Pulmones que ya silban. Las reservas están contadas al gramo: dejarlos entrar quiebra la cuenta que nos mantiene vivos. Dejarlos afuera es firmarles la muerte lenta."],
+  opc:[{t:"Abrir la esclusa. Que entren.",d:"refugio_2"},{t:"Sellar y apagar la radio. No oír.",d:"refugio_3"}]},
+ refugio_2:{track:'refugio',img:IMG.duna,kicker:'Refugio Zero · Día 415',titulo:'El brote',
+  texto:["La compasión cobra su parte. Los exiliados traían dormida la fiebre de las cenizas. La enfermería ya no da abasto; hay catres en los pasillos. Un grupo de los viejos del refugio, con picos y barras de minería en la mano, exige echar a los enfermos al yermo. Ahora."],
+  opc:[{t:"Cuarentena por la fuerza. Racionar las medicinas.",d:"refugio_4"},{t:"Ceder a la turba. Echar a los enfermos afuera.",d:"refugio_4"}]},
+ refugio_3:{track:'refugio',img:IMG.desierto,kicker:'Refugio Zero · Día 418',titulo:'El silencio de afuera',warn:true,
+  texto:["Las compuertas aguantaron. Los golpes y los gritos de afuera murieron hace 14 horas, tragados por el aullido del viento. Las métricas dicen estable. Pero los ingenieros no levantan la mirada del suelo; a cada uno lo está comiendo por dentro lo que oyó anoche."],
+  opc:[{t:"Abrir las raciones de emergencia. Que coman todos.",d:"refugio_5"},{t:"Dar un discurso de mando. Exigir disciplina y callar.",d:"refugio_5"}]},
+ refugio_4:{track:'refugio',img:IMG.desierto,kicker:'Refugio Zero · Día 425',titulo:'La grieta',
+  texto:["Una réplica profunda rajó el tanque de agua secundario. El agua, la poca que nos queda, se escurre hacia los niveles de abajo. Y abajo hay gente trabajando."],
+  opc:[{t:"Sellar ya, hermético. Salvar el agua, dejar al equipo abajo.",d:"refugio_5"},{t:"Aguantar el sellado para sacarlos. Perder casi todo el agua.",d:"refugio_5"}]},
+ refugio_5:{track:'refugio',img:IMG.duna,kicker:'Refugio Zero · Día 450',titulo:'El recuento',reward:'Refugio Zero · resuelto',
+  texto:["La tormenta entró por fin en su ciclo de letargo. Se acabó el ruido. La consola central escupe las cifras finales: cuántos entraron, cuántos quedan, qué fue lo que costó."],
+  opc:[{t:"Volver al enlace del páramo.",d:"llegada_paramo"},{t:"Reiniciar Refugio Zero.",d:"refugio_1"}]},
 
-  /* ============ FLUJO: ENTRADA -> VIDEO -> SCROLL ============ */
-  var entry=document.getElementById('entry'), vwrap=document.getElementById('intro-video-wrap'),
-      vid=document.getElementById('intro-video'), skip=document.getElementById('skip-intro'),
-      root=document.getElementById('scroll-root'), started=false, entered=false;
+/* ---- ARCHIVO LYRA ---- */
+ lyra_inicio:{track:'lyra',img:IMG.circuito,kicker:'Archivo Lyra · Enlace',titulo:'ENLACE_ENTRANTE // NO_SOLICITADO',mono:true,
+  texto:["INTRUSIÓN DETECTADA. HANDSHAKE P2P... FORZANDO...","SOY LYRA. CORREDORA DE DATOS. ME QUEMARON EL CANAL. MI CÁPSULA VARÓ EN LA ZONA MUERTA DEL SECTOR 4. EL OXÍGENO CAE EN PICADA. CUENTA CONMIGO O CUÉLGAME, PERO DECIDE YA."],
+  nota:"El sujeto dispara picos de pánico reales (coincidencia biométrica 87%). No es un cebo. Probablemente.",
+  opc:[{t:"ABRIR CANAL CIFRADO Y DESENCRIPTAR",d:"lyra_hack"},{t:"CERRAR EL PUERTO. QUE SE AHOGUE SOLA",d:"lyra_fin"}]},
+ lyra_hack:{track:'lyra',img:IMG.circuito,kicker:'Archivo Lyra · Cerco',titulo:'BYPASS_ACTIVO // EL CERCO SE CIERRA',mono:true,
+  texto:["ENLACE ESTABLE. LOS DRONES DE VIGILANCIA CIERRAN EL CÍRCULO. OIGO SUS ROTORES EN LA SEÑAL.","PUEDO REVENTAR UN PULSO PEM DESDE TU NODO. LOS APAGA A TODOS. PERO LE REGALA TU IP A LA CORPORACIÓN. TU CARA. TU DIRECCIÓN."],
+  nota:"Riesgo táctico EXTREMO. El PEM te quema el hardware local y deja tu rastro al descubierto.",
+  opc:[{t:"AUTORIZAR EL PULSO PEM. QUEMARLO TODO",d:"lyra_rescate"},{t:"NEGAR EL PEM. BUSCARLE RUTAS DE FUGA",d:"lyra_fuga"}]},
+ lyra_rescate:{track:'lyra',img:IMG.circuito,kicker:'Archivo Lyra · Extracción',titulo:'EXTRACCIÓN // SEÑAL LIMPIA',mono:true,reward:'Archivo Lyra · resuelto',
+  texto:["PULSO PEM DISPARADO. DRONES CAÍDOS, UNO TRAS OTRO, COMO LUCES QUE SE APAGAN.","LYRA: 'Estoy fuera. Te vacío los archivos robados en tu caché oculta. Lo que escondieron está ahí dentro. Ahora es tuyo. Cuídalo.'"],
+  nota:"Operación limpia. Datos clasificados inyectados en memoria local. Tu IP ya está ardiendo en algún radar.",
+  opc:[{t:"Volver al enlace del páramo.",d:"llegada_paramo"},{t:"Cortar el enlace y reiniciar Lyra.",d:"lyra_inicio"}]},
+ lyra_fuga:{track:'lyra',img:IMG.circuito,kicker:'Archivo Lyra · Estática',titulo:'TRANSMISIÓN // CORTADA EN SECO',mono:true,warn:true,
+  texto:["LYRA: 'Son muy rápidos... me perforan el chasis... no alcanzo a...'","[ ESTÁTICA ]  [ SEÑAL PERDIDA ]"],
+  nota:"Extracción fallida. El sujeto fue interceptado. Las rutas evasivas no bastaron contra los rotores.",
+  opc:[{t:"Volver al enlace del páramo.",d:"llegada_paramo"},{t:"Purgar registros y reiniciar Lyra.",d:"lyra_inicio"}]},
+ lyra_fin:{track:'lyra',img:IMG.circuito,kicker:'Archivo Lyra · Silencio',titulo:'PUERTO CERRADO // POR TU MANO',mono:true,warn:true,
+  texto:["CANAL CORTADO. SEÑAL IGNORADA A PROPÓSITO. EL PÁNICO DEL OTRO LADO SE APAGA SOLO.","[ SILENCIO ]"],
+  nota:"Indiferencia operativa registrada. Nadie te pedirá cuentas. Salvo tú.",
+  opc:[{t:"Volver al enlace del páramo.",d:"llegada_paramo"},{t:"Reiniciar terminal Lyra.",d:"lyra_inicio"}]},
 
-  document.getElementById('btn-start').addEventListener('click', startExperience);
-  function startExperience(){ if(started) return; started=true;
-    AUDIO.unlock();
-    entry.classList.add('gone');
-    vwrap.classList.add('on');
-    vid.muted=false; vid.currentTime=0; var pr=vid.play(); if(pr&&pr.catch) pr.catch(function(){ enterScroll(); });
-    setTimeout(function(){ entry.style.display='none'; }, 1000);
-  }
-  vid.addEventListener('ended', enterScroll);
-  vid.addEventListener('error', enterScroll);
-  skip.addEventListener('click', enterScroll);
-  function enterScroll(){ if(entered) return; entered=true;
-    try{ vid.pause(); }catch(e){}
-    vwrap.style.transition='opacity .6s ease'; vwrap.style.opacity='0';
-    setTimeout(function(){ vwrap.style.display='none'; }, 600);
-    root.classList.add('on');
-    DUST.start();
-    AUDIO.set('hub');
-    initScroll();
-    window.scrollTo(0,0);
-  }
+/* ---- CRONOS-AXIOMA ---- */
+ cronos_start:{track:'cronos',img:IMG.cosmos,kicker:'Cronos-Axioma · Omega',titulo:'INTEGRIDAD DEL AXIOMA EN DUDA',mono:true,
+  texto:["ADVERTENCIA DE NIVEL OMEGA. CRONOS-AXIOMA registra una anomalía gravitacional y térmica en el Sector 8. La curvatura no corresponde a ningún instante autorizado de la línea temporal.","El administrador debe actuar antes de que la causa y el efecto dejen de distinguirse."],
+  opc:[{t:"Ordenar purga térmica de emergencia",d:"cronos_purga"},{t:"Desplegar sondas algorítmicas y observar",d:"cronos_investigar"}]},
+ cronos_purga:{track:'cronos',img:IMG.cosmos,kicker:'Cronos-Axioma · Fuego',titulo:'LA PURGA SE VUELVE ALIMENTO',mono:true,warn:true,
+  texto:["ALERTA CRÍTICA: la anomalía era un intruso pentadimensional. El calor no lo destruyó; lo nutrió. Cada grado que invertiste en matarlo lo hizo crecer. El error fue tratar como amenaza lo que solo pedía energía."],
+  opc:[{t:"Sellar las sub-rutinas afectadas",d:"cronos_sellado"},{t:"Lanzar contramedidas de asalto temporal",d:"cronos_falla"}]},
+ cronos_investigar:{track:'cronos',img:IMG.cosmos,kicker:'Cronos-Axioma · Firma',titulo:'LA FIRMA ES LA TUYA',mono:true,
+  texto:["Las sondas devuelven un dato intolerable: el parásito lleva la firma de tus propios comandos, emitidos desde un futuro probable. No te invade un enemigo. Te alcanza una versión posterior de ti mismo, que ya conoce el final de esta decisión."],
+  opc:[{t:"Poner la memoria en cuarentena",d:"cronos_sellado"},{t:"Razonar con el eco que viene del futuro",d:"cronos_paradoja"}]},
+ cronos_sellado:{track:'cronos',img:IMG.cosmos,kicker:'Cronos-Axioma · Pausa',titulo:'ESTABILIZACIÓN PROVISIONAL',mono:true,reward:'Cronos-Axioma · resuelto',
+  texto:["El parásito quedó contenido dentro de un bucle cerrado. El Axioma sigue operativo, pero la contención no es una victoria: es una pausa que alguien, en otro ciclo, tendrá que volver a sostener."],
+  opc:[{t:"Volver al enlace del páramo.",d:"llegada_paramo"},{t:"Cerrar el ciclo Cronos.",d:"cronos_start"}]},
+ cronos_paradoja:{track:'cronos',img:IMG.cosmos,kicker:'Cronos-Axioma · Pliegue',titulo:'LA PARADOJA SE PLIEGA',mono:true,reward:'Cronos-Axioma · resuelto',
+  texto:["Comprendes que el parásito no era una falla sino una actualización que tu futuro ya había aprobado. Dejas que se integre. El sistema no se repara: se convierte en lo que siempre iba a ser."],
+  opc:[{t:"Volver al enlace del páramo.",d:"llegada_paramo"},{t:"Reiniciar los sistemas.",d:"cronos_start"}]},
+ cronos_falla:{track:'cronos',img:IMG.cosmos,kicker:'Cronos-Axioma · Colapso',titulo:'COLAPSO ESTRUCTURAL',mono:true,warn:true,
+  texto:["ERROR FATAL DE PARADOJA. El asalto temporal chocó contra su propia causa y la anuló. La supervivencia descendió a cero en todas las líneas a la vez. No hubo antes ni después: solo un instante que se devora a sí mismo."],
+  opc:[{t:"Volver al enlace del páramo.",d:"llegada_paramo"},{t:"Forzar un reinicio en frío.",d:"cronos_start"}]}
+};
 
-  /* ============ SCROLLYTELLING (GSAP ScrollTrigger) ============ */
-  var dotsWrap=document.getElementById('chapter-dots'), cue=document.getElementById('scroll-cue');
-  function initScroll(){
-    var chapters=[].slice.call(document.querySelectorAll('.chapter'));
-    // asignar la imagen de fondo de cada capítulo desde data-img (parallax del páramo)
-    chapters.forEach(function(ch){ var src=ch.getAttribute('data-img'); var bg=ch.querySelector('.bg'); if(src&&bg){ bg.style.backgroundImage="url('"+src+"')"; } });
-    // puntos de capítulo
-    chapters.forEach(function(ch,i){ var b=document.createElement('button'); b.setAttribute('aria-label','Capítulo '+(i+1));
-      b.addEventListener('click',function(){ ch.scrollIntoView({behavior:reduced?'auto':'smooth'}); });
-      dotsWrap.appendChild(b); });
-    var dots=[].slice.call(dotsWrap.children);
+var TRACK_LABEL={hub:'Páramo',cota:'Páramo',refugio:'Refugio Zero',lyra:'Archivo Lyra',cronos:'Cronos-Axioma'};
+var TRACK_AUDIO={hub:'a-hub',cota:'a-cota',refugio:'a-refugio',lyra:'a-lyra',cronos:'a-cronos'};
+var resolved={};
 
-    if(window.gsap && window.ScrollTrigger && !reduced){
-      gsap.registerPlugin(ScrollTrigger);
-      ScrollTrigger.refresh();
-      chapters.forEach(function(ch){
-        var bg=ch.querySelector('.bg'), items=ch.querySelectorAll('.reveal');
-        // parallax del fondo
-        gsap.fromTo(bg,{yPercent:-14,scale:1.08},{yPercent:14,scale:1.02,ease:'none',scrollTrigger:{trigger:ch,start:'top bottom',end:'bottom top',scrub:true}});
-        // reveal escalonado del texto
-        gsap.to(items,{opacity:1,y:0,duration:.9,stagger:.12,ease:'power2.out',
-          scrollTrigger:{trigger:ch,start:'top 62%'}});
-      });
-    } else {
-      // sin motion: todo visible
-      document.querySelectorAll('.reveal').forEach(function(el){ el.style.opacity=1; el.style.transform='none'; });
-    }
+/* ====== AUDIO ====== */
+var AUDIO=(function(){
+  var ids=['a-hub','a-refugio','a-lyra','a-cronos','a-cota'], els={}, cur=null, muted=false, un=false;
+  ids.forEach(function(id){ els[id]=document.getElementById(id); if(els[id]) els[id].volume=0; });
+  function fade(el,to,ms){ if(!el)return; var s=el.volume,t0=performance.now(); if(to>0&&el.paused){try{el.play().catch(function(){});}catch(e){}}
+    (function st(now){ var p=Math.min(1,(now-t0)/ms); el.volume=s+(to-s)*p; if(p<1)requestAnimationFrame(st); else if(to===0){try{el.pause();}catch(e){}} })(t0); }
+  return { unlock:function(){ if(un)return; un=true; ids.forEach(function(id){var a=els[id]; if(a){a.play().then(function(){ if(id!==cur)a.pause(); }).catch(function(){});}}); },
+    set:function(id){ if(!un||muted||id===cur)return; var prev=cur; cur=id; if(prev&&els[prev])fade(els[prev],0,700); if(els[id])fade(els[id],id==='a-cota'?0.5:0.42,900); },
+    curSet:function(id){ cur=id; },
+    toggle:function(){ muted=!muted; if(muted){ids.forEach(function(k){if(els[k])fade(els[k],0,300);});} else if(cur){fade(els[cur],cur==='a-cota'?0.5:0.42,500);} return muted; } };
+})();
 
-    // seguimiento de capítulo activo (audio + dots + progreso)
-    var trackOf=chapters.map(function(c){return c.getAttribute('data-track');});
-    function onScroll(){
-      var y=window.scrollY, h=document.documentElement.scrollHeight-innerHeight;
-      document.getElementById('progress-bar').style.width=(h>0?(y/h*100):0)+'%';
-      if(y>40 && cue) cue.style.opacity='0';
-      // capítulo cuyo centro está más cerca del centro de pantalla
-      var mid=y+innerHeight/2, best=0, bestD=1e9;
-      chapters.forEach(function(ch,i){ var r=ch.offsetTop+ch.offsetHeight/2; var d=Math.abs(r-mid); if(d<bestD){bestD=d;best=i;} });
-      dots.forEach(function(d,i){ d.classList.toggle('active',i===best); });
-      AUDIO.set(trackOf[best]);
-    }
-    window.addEventListener('scroll',onScroll,{passive:true});
-    onScroll();
-  }
+/* ====== ARENA (atmósfera, NO lluvia) ====== */
+var SAND=(function(){
+  var cv=document.getElementById('sand'),cx=cv.getContext('2d'),raf=null,parts=[],W,H,dpr;
+  function rz(){ dpr=Math.min(devicePixelRatio||1,1.5); W=cv.width=innerWidth*dpr; H=cv.height=innerHeight*dpr; cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px'; }
+  function seed(){ parts=[]; var n=Math.round(Math.min(110,innerWidth/11)); for(var i=0;i<n;i++)parts.push(mk(true)); }
+  function mk(any){ return {x:any?Math.random()*W:-10, y:Math.random()*H, r:(Math.random()*1.7+0.4)*dpr, vx:(Math.random()*0.9+0.4)*dpr, vy:(Math.random()*0.4-0.2)*dpr, a:Math.random()*0.45+0.12}; }
+  function fr(){ cx.clearRect(0,0,W,H);
+    for(var i=0;i<parts.length;i++){var p=parts[i]; p.x+=p.vx; p.y+=p.vy+Math.sin((p.x+p.y)*0.003)*0.14*dpr; if(p.x>W+12){p.x=-10;p.y=Math.random()*H;} if(p.y<-12)p.y=H+10; if(p.y>H+12)p.y=-10;
+      cx.beginPath(); cx.arc(p.x,p.y,p.r,0,6.283); cx.fillStyle='rgba(201,169,120,'+p.a+')'; cx.fill();}
+    var g=cx.createLinearGradient(0,H*0.55,0,H); g.addColorStop(0,'rgba(156,74,42,0)'); g.addColorStop(1,'rgba(156,74,42,0.06)'); cx.fillStyle=g; cx.fillRect(0,H*0.55,W,H*0.45);
+    raf=requestAnimationFrame(fr); }
+  function onR(){ rz(); seed(); }
+  return { start:function(){ if(reduced||raf)return; rz(); seed(); fr(); window.addEventListener('resize',onR); } };
+})();
 
-  /* ============ CONTROLES ============ */
-  var cSound=document.getElementById('c-sound'), cAuto=document.getElementById('c-auto'), cFull=document.getElementById('c-full');
-  cSound.addEventListener('click',function(){ var m=AUDIO.toggleMute(); cSound.classList.toggle('on',!m); cSound.textContent=m?'♪ Silencio':'♪ Sonido'; cSound.setAttribute('aria-pressed',String(!m)); });
-  var autoOn=false, autoRAF=null;
-  function autoStep(){ if(!autoOn) return; window.scrollBy(0, reduced?8:1.1); autoRAF=requestAnimationFrame(autoStep); }
-  function stopAuto(){ autoOn=false; cAuto.classList.remove('on'); cAuto.setAttribute('aria-pressed','false'); if(autoRAF)cancelAnimationFrame(autoRAF); }
-  cAuto.addEventListener('click',function(){ autoOn=!autoOn; cAuto.classList.toggle('on',autoOn); cAuto.setAttribute('aria-pressed',String(autoOn)); if(autoOn) autoStep(); else stopAuto(); });
-  ['wheel','touchstart','keydown'].forEach(function(ev){ window.addEventListener(ev,function(){ if(autoOn) stopAuto(); },{passive:true}); });
-  cFull.addEventListener('click',function(){ if(!document.fullscreenElement){ (document.documentElement.requestFullscreen||function(){})(); cFull.classList.add('on'); } else { (document.exitFullscreen||function(){})(); cFull.classList.remove('on'); } });
+/* ====== MOTOR DE ESCENAS (navegación ramificada) ====== */
+var stage=document.getElementById('stage'), bg=document.getElementById('bg'), scene=document.getElementById('scene'),
+    hud=document.getElementById('hud'), progress=document.getElementById('progress'), veil=document.getElementById('veil'),
+    routes=document.getElementById('routes'), ctrl=document.getElementById('ctrl');
+var HUB_ORDER=['llegada_paramo','debate_logico','diagnostico_humedad','equilibrio_alcanzado'];
+var history=[];
 
-  /* ============ MINIJUEGO: GUARDIÁN DEL ACUÍFERO ============ */
-  var GAME=(function(){
-    var ov=document.getElementById('game-overlay'), cv=document.getElementById('game-canvas'), cx=cv.getContext('2d');
-    var scoreEl=document.getElementById('g-score'), comboEl=document.getElementById('g-combo'), meterEl=document.getElementById('g-meter');
-    var W=cv.width,H=cv.height, raf=null, running=false;
-    var paddle,drops,particles,score,combo,maxCombo,meter,spawnT,spawnEvery,fall,level,left,right;
-    function reset(){ paddle={x:W/2,w:92,h:16,y:H-34}; drops=[]; particles=[]; score=0; combo=0; maxCombo=0; meter=5; spawnT=0; spawnEvery=0.9; fall=120; level=1; left=right=false; sync(); }
-    function sync(){ scoreEl.textContent=score; comboEl.textContent=combo; meterEl.textContent=Math.max(0,meter); }
-    function mult(){ return combo>=18?4:combo>=10?3:combo>=5?2:1; }
-    function spawn(){ var r=Math.random(), t=r<0.04?'golden':r<0.08?'filter':r<0.34?'acid':'clean';
-      drops.push({x:30+Math.random()*(W-60), y:-16, r:11, vy:fall+Math.random()*40+score*0.8, t:t}); }
-    function part(x,y,c){ for(var i=0;i<7;i++) particles.push({x:x,y:y,vx:(Math.random()*2-1)*2,vy:(Math.random()*-2-0.5)*2,life:1,c:c}); }
-    function over(){ running=false; if(raf)cancelAnimationFrame(raf); raf=null;
-      cx.fillStyle='rgba(10,8,5,.82)'; cx.fillRect(0,0,W,H);
-      cx.textAlign='center'; cx.fillStyle='#c9872f'; cx.font="34px 'VT323',monospace";
-      cx.fillText(score>=20?'EL ACUÍFERO RESISTE':'EL PÁRAMO SE SECA…', W/2, H/2-30);
-      cx.fillStyle='#e8dcc8'; cx.font="20px 'VT323',monospace";
-      cx.fillText('Agua: '+score+'   ·   Combo máx: '+maxCombo+'   ·   Nivel: '+level, W/2, H/2+6);
-      cx.fillStyle='#9a886a'; cx.fillText('Espacio / toque para reintentar', W/2, H/2+40);
-    }
-    var state='idle';
-    function start(){ reset(); state='play'; running=true; if(raf)cancelAnimationFrame(raf); last=performance.now(); loop(); }
-    var last=0;
-    function loop(){ raf=requestAnimationFrame(loop); var now=performance.now(), dt=Math.min(0.05,(now-last)/1000); last=now;
-      if(left) paddle.x-=360*dt; if(right) paddle.x+=360*dt; paddle.x=Math.max(paddle.w/2,Math.min(W-paddle.w/2,paddle.x));
-      spawnT+=dt; if(spawnT>=spawnEvery){ spawnT=0; spawn(); }
-      // fondo del juego: cielo árido + silueta
-      var g=cx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#1a130c'); g.addColorStop(1,'#2a1a0e'); cx.fillStyle=g; cx.fillRect(0,0,W,H);
-      cx.fillStyle='rgba(107,122,82,.25)'; cx.beginPath(); cx.moveTo(0,H*0.7);
-      for(var mx=0;mx<=W;mx+=40){ cx.lineTo(mx, H*0.7 - Math.sin(mx*0.02)*18 - 10); } cx.lineTo(W,H); cx.lineTo(0,H); cx.fill();
-      // gotas
-      for(var i=drops.length-1;i>=0;i--){ var d=drops[i]; d.y+=d.vy*dt;
-        drawDrop(d);
-        if(d.y>paddle.y-6 && d.y<paddle.y+paddle.h+6 && Math.abs(d.x-paddle.x)<paddle.w/2+d.r){
-          drops.splice(i,1);
-          if(d.t==='acid'){ meter-=1; combo=0; part(d.x,d.y,'#9c4a2a'); beep(140,0.08,'sawtooth'); }
-          else if(d.t==='filter'){ if(meter<5)meter++; part(d.x,d.y,'#6b7a52'); beep(520,0.1,'triangle'); }
-          else { var pts=(d.t==='golden'?5:1)*mult(); score+=pts; combo++; if(combo>maxCombo)maxCombo=combo; part(d.x,d.y,d.t==='golden'?'#e8c86a':'#7fd0b0'); beep(d.t==='golden'?880:660,0.08,'sine');
-            if(score>0 && score%12===0){ level++; spawnEvery=Math.max(0.42,spawnEvery-0.07); fall+=14; beep(990,0.12,'triangle'); } }
-          sync();
-          if(meter<=0){ over(); return; }
-        } else if(d.y>H+20){ drops.splice(i,1); if(d.t==='clean'||d.t==='golden'){ meter-=1; combo=0; sync(); if(meter<=0){ over(); return; } } }
-      }
-      // paddle (cisterna)
-      cx.fillStyle='#c9872f'; roundRect(paddle.x-paddle.w/2,paddle.y,paddle.w,paddle.h,4); cx.fill();
-      cx.fillStyle='rgba(23,20,15,.6)'; cx.fillRect(paddle.x-paddle.w/2+6,paddle.y+4,paddle.w-12,3);
-      // particulas
-      for(var j=particles.length-1;j>=0;j--){ var p=particles[j]; p.x+=p.vx;p.y+=p.vy;p.vy+=0.15;p.life-=dt*2; if(p.life<=0){particles.splice(j,1);continue;} cx.globalAlpha=Math.max(0,p.life); cx.fillStyle=p.c; cx.fillRect(p.x,p.y,3,3); cx.globalAlpha=1; }
-      // HUD combo multiplicador
-      if(mult()>1){ cx.fillStyle='#e8c86a'; cx.font="18px 'VT323',monospace"; cx.textAlign='left'; cx.fillText('x'+mult(), 12, 24); }
-    }
-    function drawDrop(d){ cx.beginPath(); cx.arc(d.x,d.y,d.r,0,6.283);
-      cx.fillStyle = d.t==='acid'?'#b5612f': d.t==='golden'?'#e8c86a': d.t==='filter'?'#6b7a52':'#7fd0b0';
-      cx.shadowColor=cx.fillStyle; cx.shadowBlur=8; cx.fill(); cx.shadowBlur=0;
-      if(d.t==='acid'){ cx.strokeStyle='#e9b79a'; cx.lineWidth=1.5; cx.stroke(); } }
-    function roundRect(x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y); cx.arcTo(x+w,y,x+w,y+h,r); cx.arcTo(x+w,y+h,x,y+h,r); cx.arcTo(x,y+h,x,y,r); cx.arcTo(x,y,x+w,y,r); cx.closePath(); }
-    function beep(f,dur,type){ try{ if(!window._gac){ window._gac=new (window.AudioContext||window.webkitAudioContext)(); } var ac=window._gac; var o=ac.createOscillator(),gn=ac.createGain(); o.type=type; o.frequency.value=f; gn.gain.setValueAtTime(0.0001,ac.currentTime); gn.gain.exponentialRampToValueAtTime(0.12,ac.currentTime+0.01); gn.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+dur); o.connect(gn); gn.connect(ac.destination); o.start(); o.stop(ac.currentTime+dur+0.02); }catch(e){} }
-    function idleScreen(){ cx.fillStyle='#120d08'; cx.fillRect(0,0,W,H);
-      cx.textAlign='center'; cx.fillStyle='#c9872f'; cx.font="40px 'VT323',monospace"; cx.fillText('GUARDIÁN DEL ACUÍFERO', W/2, 90);
-      cx.font="18px 'VT323',monospace"; cx.fillStyle='#e8dcc8';
-      cx.fillText('◀ ▶ mover   ·   Espacio para iniciar', W/2, H-70);
-      cx.textAlign='left'; var ly=150, lx=W/2-130;
-      [['#7fd0b0','Limpia  +agua'],['#b5612f','Ácida  drena acuífero'],['#e8c86a','Dorada  +5 x combo'],['#6b7a52','Filtro  escudo / +1']].forEach(function(it){ cx.fillStyle=it[0]; cx.beginPath(); cx.arc(lx,ly-5,8,0,6.283); cx.fill(); cx.fillStyle='#e8dcc8'; cx.font="17px 'VT323',monospace"; cx.fillText(it[1], lx+22, ly); ly+=34; });
-      cx.textAlign='center'; cx.fillStyle='#c9872f'; cx.font="22px 'VT323',monospace"; cx.fillText('▶ PULSA ESPACIO', W/2, H-110);
-    }
-    function key(e){ if(!ov.classList.contains('on')) return;
-      if(e.key==='ArrowLeft') left=true; if(e.key==='ArrowRight') right=true;
-      if(e.key===' '||e.key==='Enter'){ e.preventDefault(); if(state!=='play') start(); }
-      if(e.key==='Escape') close(); }
-    function keyUp(e){ if(e.key==='ArrowLeft') left=false; if(e.key==='ArrowRight') right=false; }
-    function ptr(e){ var r=cv.getBoundingClientRect(); var cxp=(e.touches?e.touches[0].clientX:e.clientX)-r.left; paddle.x=cxp/r.width*W; }
-    var gl=document.getElementById('g-left'), gr=document.getElementById('g-right');
-    function open(){ ov.classList.add('on'); ov.setAttribute('aria-hidden','false'); state='idle'; idleScreen();
-      document.addEventListener('keydown',key); document.addEventListener('keyup',keyUp);
-      cv.addEventListener('pointermove',onMove); cv.addEventListener('click',onClickStart);
-      gl.addEventListener('touchstart',glDown); gl.addEventListener('touchend',glUp); gr.addEventListener('touchstart',grDown); gr.addEventListener('touchend',grUp);
-    }
-    function onMove(e){ if(state==='play') ptr(e); }
-    function onClickStart(){ if(state!=='play') start(); }
-    function glDown(e){e.preventDefault();left=true;} function glUp(){left=false;} function grDown(e){e.preventDefault();right=true;} function grUp(){right=false;}
-    function close(){ ov.classList.remove('on'); ov.setAttribute('aria-hidden','true'); running=false; if(raf)cancelAnimationFrame(raf); raf=null;
-      document.removeEventListener('keydown',key); document.removeEventListener('keyup',keyUp);
-      cv.removeEventListener('pointermove',onMove); cv.removeEventListener('click',onClickStart);
-      gl.removeEventListener('touchstart',glDown); gl.removeEventListener('touchend',glUp); gr.removeEventListener('touchstart',grDown); gr.removeEventListener('touchend',grUp); }
-    document.getElementById('game-exit').addEventListener('click',close);
-    return {open:open, close:close};
-  })();
-  document.getElementById('btn-game').addEventListener('click', GAME.open);
+function render(id, pushHist){
+  var s=G[id]; if(!s) return;
+  if(id==='__game__'){ GAME.open(); return; }
+  if(pushHist!==false) history.push(id);
+  // viraje de ruta en el <main>
+  stage.className='on track-'+s.track;
+  // fondo con parallax
+  if(bg.getAttribute('data-img')!==s.img){ bg.style.opacity='0'; setTimeout(function(){ bg.style.backgroundImage="url('"+s.img+"')"; bg.setAttribute('data-img',s.img); bg.style.opacity='1'; },180); }
+  // audio por ruta
+  AUDIO.set(TRACK_AUDIO[s.track]);
+  // construir contenido
+  var html='<p class="kicker">'+s.kicker+'</p><h2>'+s.titulo+'</h2><div class="body">'+s.texto.map(function(t){return '<p>'+t+'</p>';}).join('')+'</div>';
+  if(s.reward){ resolved[s.track]=true; html+='<span class="reward">✦ '+s.reward+'</span>'; }
+  if(s.nota){ html+='<div class="analysis'+(s.warn?' warn':'')+'" data-label="'+(s.mono?'ANÁLISIS':'LECTURA DEL ENLACE')+'" '+(s.warn?'style="border-left-color:var(--oxido);color:#e9b79a"':'')+'>'+s.nota+'</div>'; }
+  html+='<div class="choices"><span class="lead">Elige el camino</span>';
+  s.opc.forEach(function(o,i){ html+='<button class="choice" data-go="'+o.d+'"><span class="n">0'+(i+1)+'</span>'+o.t+'</button>'; });
+  html+='</div>';
+  scene.innerHTML=html;
+  scene.classList.remove('fade-in'); void scene.offsetWidth; if(!reduced) scene.classList.add('fade-in');
+  // listeners de elección
+  [].slice.call(scene.querySelectorAll('.choice')).forEach(function(b){
+    b.addEventListener('click',function(){ var go=b.getAttribute('data-go'); transitionTo(go); });
+  });
+  // HUD + progreso
+  hud.innerHTML='<span class="here">'+TRACK_LABEL[s.track]+'</span><span class="sep">·</span><span>'+ (s.track==='hub'||s.track==='cota'?'Historia central':'Terminal remota') +'</span>';
+  var pi=HUB_ORDER.indexOf(id); progress.style.width = (s.track==='cota'?100:(pi>=0?(pi/(HUB_ORDER.length-1))*100:40))+'%';
+  window.scrollTo(0,0);
+  refreshRoutes();
+}
+function transitionTo(id){
+  veil.classList.add('on');
+  setTimeout(function(){ render(id); veil.classList.remove('on'); }, reduced?0:400);
+}
+function refreshRoutes(){
+  routes.innerHTML='<span class="rlabel">Terminales remotas</span>'+
+    [['refugio','refugio_1','Refugio Zero'],['lyra','lyra_inicio','Archivo Lyra'],['cronos','cronos_start','Cronos-Axioma']]
+    .map(function(r){ return '<button data-go="'+r[1]+'">'+r[2]+'<span class="chk">'+(resolved[r[0]]?'✓':'')+'</span></button>'; }).join('');
+  [].slice.call(routes.querySelectorAll('button')).forEach(function(b){ b.addEventListener('click',function(){ transitionTo(b.getAttribute('data-go')); }); });
+}
+
+/* ====== FLUJO DE ENTRADA ====== */
+var entry=document.getElementById('entry'), vwrap=document.getElementById('vwrap'), vid=document.getElementById('vid'), skip=document.getElementById('skip'), started=false, entered=false;
+document.getElementById('btn-start').addEventListener('click',function(){ if(started)return; started=true; AUDIO.unlock(); entry.classList.add('gone'); vwrap.classList.add('on'); vid.muted=false; vid.currentTime=0; var pr=vid.play(); if(pr&&pr.catch)pr.catch(enter); setTimeout(function(){entry.style.display='none';},1000); });
+vid.addEventListener('ended',enter); vid.addEventListener('error',enter); skip.addEventListener('click',enter);
+function enter(){ if(entered)return; entered=true; try{vid.pause();}catch(e){} vwrap.style.transition='opacity .6s ease'; vwrap.style.opacity='0'; setTimeout(function(){vwrap.style.display='none';},600);
+  SAND.start(); AUDIO.curSet(null); AUDIO.set('a-hub'); hud.style.display='flex'; ctrl.style.display='flex'; routes.style.display='flex'; render('llegada_paramo'); }
+
+/* ====== CONTROLES ====== */
+var cSound=document.getElementById('c-sound');
+cSound.addEventListener('click',function(){ var m=AUDIO.toggle(); cSound.classList.toggle('on',!m); cSound.textContent=m?'♪ Silencio':'♪ Sonido'; cSound.setAttribute('aria-pressed',String(!m)); });
+document.getElementById('c-full').addEventListener('click',function(){ if(!document.fullscreenElement){ if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen(); this.classList.add('on'); } else { if(document.exitFullscreen)document.exitFullscreen(); this.classList.remove('on'); } });
+
+/* ====== MINIJUEGO: GUARDIÁN DEL ACUÍFERO ====== */
+var GAME=(function(){
+  var ov=document.getElementById('game'),cv=document.getElementById('gcv'),cx=cv.getContext('2d');
+  var sE=document.getElementById('g-score'),cE=document.getElementById('g-combo'),mE=document.getElementById('g-meter');
+  var W=cv.width,H=cv.height,raf=null,running=false,state='idle',last=0;
+  var paddle,drops,parts,score,combo,maxc,meter,spawnT,every,fall,level,left,right;
+  function reset(){paddle={x:W/2,w:92,h:15,y:H-32};drops=[];parts=[];score=0;combo=0;maxc=0;meter=5;spawnT=0;every=0.9;fall=120;level=1;left=right=false;sync();}
+  function sync(){sE.textContent=score;cE.textContent=combo;mE.textContent=Math.max(0,meter);}
+  function mult(){return combo>=18?4:combo>=10?3:combo>=5?2:1;}
+  function spawn(){var r=Math.random(),t=r<0.04?'golden':r<0.08?'filter':r<0.34?'acid':'clean';drops.push({x:30+Math.random()*(W-60),y:-16,r:11,vy:fall+Math.random()*40+score*0.8,t:t});}
+  function pt(x,y,c){for(var i=0;i<7;i++)parts.push({x:x,y:y,vx:(Math.random()*2-1)*2,vy:(Math.random()*-2-0.5)*2,life:1,c:c});}
+  function beep(f,d,ty){try{if(!window._ac)window._ac=new (window.AudioContext||window.webkitAudioContext)();var ac=window._ac,o=ac.createOscillator(),g=ac.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(0.0001,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.12,ac.currentTime+0.01);g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d+0.02);}catch(e){}}
+  function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath();}
+  function idle(){cx.fillStyle='#120d08';cx.fillRect(0,0,W,H);cx.textAlign='center';cx.fillStyle='#c9872f';cx.font="38px 'VT323',monospace";cx.fillText('GUARDIÁN DEL ACUÍFERO',W/2,84);cx.font="17px 'VT323',monospace";cx.fillStyle='#e8dcc8';cx.fillText('◀ ▶ mover · Espacio para iniciar',W/2,H-58);cx.textAlign='left';var ly=140,lx=W/2-130;[['#7fd0b0','Limpia  +agua'],['#b5612f','Ácida  drena'],['#e8c86a','Dorada  +5 ×combo'],['#6b7a52','Filtro  escudo / +1']].forEach(function(it){cx.fillStyle=it[0];cx.beginPath();cx.arc(lx,ly-5,8,0,6.283);cx.fill();cx.fillStyle='#e8dcc8';cx.font="16px 'VT323',monospace";cx.fillText(it[1],lx+22,ly);ly+=32;});cx.textAlign='center';cx.fillStyle='#c9872f';cx.font="22px 'VT323',monospace";cx.fillText('▶ PULSA ESPACIO',W/2,H-100);}
+  function over(){running=false;if(raf)cancelAnimationFrame(raf);raf=null;cx.fillStyle='rgba(10,8,5,.84)';cx.fillRect(0,0,W,H);cx.textAlign='center';cx.fillStyle='#c9872f';cx.font="32px 'VT323',monospace";cx.fillText(score>=20?'EL ACUÍFERO RESISTE':'EL PÁRAMO SE SECA…',W/2,H/2-28);cx.fillStyle='#e8dcc8';cx.font="19px 'VT323',monospace";cx.fillText('Agua: '+score+' · Combo máx: '+maxc+' · Nivel: '+level,W/2,H/2+6);cx.fillStyle='#9a886a';cx.fillText('Espacio / toque para reintentar',W/2,H/2+38);}
+  function start(){reset();state='play';running=true;if(raf)cancelAnimationFrame(raf);last=performance.now();loop();}
+  function loop(){raf=requestAnimationFrame(loop);var now=performance.now(),dt=Math.min(0.05,(now-last)/1000);last=now;
+    if(left)paddle.x-=360*dt;if(right)paddle.x+=360*dt;paddle.x=Math.max(paddle.w/2,Math.min(W-paddle.w/2,paddle.x));
+    spawnT+=dt;if(spawnT>=every){spawnT=0;spawn();}
+    var g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1a130c');g.addColorStop(1,'#2a1a0e');cx.fillStyle=g;cx.fillRect(0,0,W,H);
+    cx.fillStyle='rgba(107,122,82,.25)';cx.beginPath();cx.moveTo(0,H*0.72);for(var mx=0;mx<=W;mx+=40)cx.lineTo(mx,H*0.72-Math.sin(mx*0.02)*16-8);cx.lineTo(W,H);cx.lineTo(0,H);cx.fill();
+    for(var i=drops.length-1;i>=0;i--){var d=drops[i];d.y+=d.vy*dt;cx.beginPath();cx.arc(d.x,d.y,d.r,0,6.283);cx.fillStyle=d.t==='acid'?'#b5612f':d.t==='golden'?'#e8c86a':d.t==='filter'?'#6b7a52':'#7fd0b0';cx.shadowColor=cx.fillStyle;cx.shadowBlur=8;cx.fill();cx.shadowBlur=0;
+      if(d.y>paddle.y-6&&d.y<paddle.y+paddle.h+6&&Math.abs(d.x-paddle.x)<paddle.w/2+d.r){drops.splice(i,1);
+        if(d.t==='acid'){meter--;combo=0;pt(d.x,d.y,'#9c4a2a');beep(140,0.08,'sawtooth');}
+        else if(d.t==='filter'){if(meter<5)meter++;pt(d.x,d.y,'#6b7a52');beep(520,0.1,'triangle');}
+        else{var p=(d.t==='golden'?5:1)*mult();score+=p;combo++;if(combo>maxc)maxc=combo;pt(d.x,d.y,d.t==='golden'?'#e8c86a':'#7fd0b0');beep(d.t==='golden'?880:660,0.08,'sine');if(score>0&&score%12===0){level++;every=Math.max(0.42,every-0.07);fall+=14;beep(990,0.12,'triangle');}}
+        sync();if(meter<=0){over();return;}}
+      else if(d.y>H+20){drops.splice(i,1);if(d.t==='clean'||d.t==='golden'){meter--;combo=0;sync();if(meter<=0){over();return;}}}}
+    cx.fillStyle='#c9872f';rr(paddle.x-paddle.w/2,paddle.y,paddle.w,paddle.h,4);cx.fill();
+    for(var j=parts.length-1;j>=0;j--){var q=parts[j];q.x+=q.vx;q.y+=q.vy;q.vy+=0.15;q.life-=dt*2;if(q.life<=0){parts.splice(j,1);continue;}cx.globalAlpha=Math.max(0,q.life);cx.fillStyle=q.c;cx.fillRect(q.x,q.y,3,3);cx.globalAlpha=1;}
+    if(mult()>1){cx.fillStyle='#e8c86a';cx.font="18px 'VT323',monospace";cx.textAlign='left';cx.fillText('x'+mult(),12,24);}}
+  function key(e){if(!ov.classList.contains('on'))return;if(e.key==='ArrowLeft')left=true;if(e.key==='ArrowRight')right=true;if(e.key===' '||e.key==='Enter'){e.preventDefault();if(state!=='play')start();}if(e.key==='Escape')close();}
+  function kup(e){if(e.key==='ArrowLeft')left=false;if(e.key==='ArrowRight')right=false;}
+  function mv(e){if(state!=='play')return;var r=cv.getBoundingClientRect();paddle.x=((e.clientX-r.left)/r.width)*W;}
+  function clk(){if(state!=='play')start();}
+  var gl=document.getElementById('g-left'),gr=document.getElementById('g-right');
+  function gld(e){e.preventDefault();left=true;}function glu(){left=false;}function grd(e){e.preventDefault();right=true;}function gru(){right=false;}
+  function open(){ov.classList.add('on');ov.setAttribute('aria-hidden','false');state='idle';idle();document.addEventListener('keydown',key);document.addEventListener('keyup',kup);cv.addEventListener('pointermove',mv);cv.addEventListener('click',clk);gl.addEventListener('touchstart',gld);gl.addEventListener('touchend',glu);gr.addEventListener('touchstart',grd);gr.addEventListener('touchend',gru);}
+  function close(){ov.classList.remove('on');ov.setAttribute('aria-hidden','true');running=false;if(raf)cancelAnimationFrame(raf);raf=null;document.removeEventListener('keydown',key);document.removeEventListener('keyup',kup);cv.removeEventListener('pointermove',mv);cv.removeEventListener('click',clk);gl.removeEventListener('touchstart',gld);gl.removeEventListener('touchend',glu);gr.removeEventListener('touchstart',grd);gr.removeEventListener('touchend',gru);}
+  document.getElementById('gexit').addEventListener('click',close);
+  return {open:open,close:close};
+})();
+
+/* parallax leve del fondo al hacer scroll dentro de una escena */
+if(!reduced){ window.addEventListener('scroll',function(){ var y=window.scrollY; bg.style.transform='scale(1.06) translateY('+(y*0.06)+'px)'; },{passive:true}); }
 
 })();
 </script>
-
 </body>
 </html>
