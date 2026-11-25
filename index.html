@@ -75,11 +75,13 @@
   #scroll-root{position:relative; z-index:3; display:none;}
   #scroll-root.on{display:block;}
   .chapter{position:relative; min-height:100vh; min-height:100svh; display:flex; align-items:center; overflow:hidden;}
-  .chapter .bg{position:absolute; inset:-8% 0; background-size:cover; background-position:center; will-change:transform;}
+  .chapter .bg{position:absolute; inset:-14% 0; background-size:cover; background-position:center; will-change:transform;}
   .chapter .scrim{position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(23,20,15,.72) 0%, rgba(23,20,15,.35) 40%, rgba(23,20,15,.85) 100%);}
-  .chapter .scrim.warm{background:linear-gradient(180deg, rgba(40,20,10,.72), rgba(23,20,15,.6) 45%, rgba(23,20,15,.9));}
-  .chapter .scrim.green{background:linear-gradient(180deg, rgba(20,28,16,.7), rgba(23,20,15,.55) 45%, rgba(23,20,15,.9));}
+    background:linear-gradient(180deg, rgba(23,20,15,.55) 0%, rgba(23,20,15,.2) 42%, rgba(23,20,15,.78) 100%);}
+  .chapter .scrim.warm{background:linear-gradient(115deg, rgba(60,28,12,.62), rgba(23,20,15,.35) 48%, rgba(23,20,15,.82));}
+  .chapter .scrim.green{background:linear-gradient(115deg, rgba(28,38,20,.6), rgba(23,20,15,.3) 48%, rgba(23,20,15,.82));}
+  /* leve virado cálido/árido sobre las fotos para unificar la atmósfera desierto/páramo */
+  .chapter .bg::after{content:''; position:absolute; inset:0; background:linear-gradient(160deg, rgba(201,135,47,.1), rgba(107,122,82,.08)); mix-blend-mode:overlay;}
   .chapter .inner{position:relative; z-index:4; width:100%; max-width:760px; margin:0 auto; padding:14vh clamp(22px,6vw,70px);}
   .chapter .kicker{font-family:'VT323',monospace; font-size:clamp(.95rem,2vw,1.2rem); letter-spacing:.3em; color:var(--ambar); text-transform:uppercase; margin:0 0 14px;}
   .chapter h2{font-size:var(--fs-h2); line-height:1.02; margin:0 0 26px; color:var(--hueso); text-shadow:0 2px 24px rgba(0,0,0,.6);}
@@ -371,6 +373,8 @@
   var dotsWrap=document.getElementById('chapter-dots'), cue=document.getElementById('scroll-cue');
   function initScroll(){
     var chapters=[].slice.call(document.querySelectorAll('.chapter'));
+    // asignar la imagen de fondo de cada capítulo desde data-img (parallax del páramo)
+    chapters.forEach(function(ch){ var src=ch.getAttribute('data-img'); var bg=ch.querySelector('.bg'); if(src&&bg){ bg.style.backgroundImage="url('"+src+"')"; } });
     // puntos de capítulo
     chapters.forEach(function(ch,i){ var b=document.createElement('button'); b.setAttribute('aria-label','Capítulo '+(i+1));
       b.addEventListener('click',function(){ ch.scrollIntoView({behavior:reduced?'auto':'smooth'}); });
@@ -383,7 +387,7 @@
       chapters.forEach(function(ch){
         var bg=ch.querySelector('.bg'), items=ch.querySelectorAll('.reveal');
         // parallax del fondo
-        gsap.fromTo(bg,{yPercent:-8},{yPercent:8,ease:'none',scrollTrigger:{trigger:ch,start:'top bottom',end:'bottom top',scrub:true}});
+        gsap.fromTo(bg,{yPercent:-14,scale:1.08},{yPercent:14,scale:1.02,ease:'none',scrollTrigger:{trigger:ch,start:'top bottom',end:'bottom top',scrub:true}});
         // reveal escalonado del texto
         gsap.to(items,{opacity:1,y:0,duration:.9,stagger:.12,ease:'power2.out',
           scrollTrigger:{trigger:ch,start:'top 62%'}});
