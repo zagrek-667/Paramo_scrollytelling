@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Páramo Omega · Travesía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;500;700&family=Inter:wght@400;500;600&family=VT323&display=swap" rel="stylesheet">
+<!-- Favicon: hexágono ámbar sobre fondo árido -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231a140d'/%3E%3Cpath d='M32 12L49 22V42L32 52L15 42V22Z' fill='none' stroke='%23c9872f' stroke-width='3' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23c9872f'/%3E%3C/svg%3E">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root{
+    --arena:#c9a978; --arena-clara:#e8dcc8; --oxido:#9c4a2a; --ambar:#c9872f;
+    --verde-seco:#6b7a52; --noche:#17140f; --noche-2:#211a12; --hueso:#e8dcc8;
+    --muted:#9a886a; --hair:rgba(201,169,120,.22); --hair-strong:rgba(201,169,120,.4);
+    --ease:cubic-bezier(.22,.61,.36,1);
+    --fs-display:clamp(2.6rem,8vw,6.5rem); --fs-h2:clamp(1.6rem,4.5vw,3rem);
+    --fs-body:clamp(1rem,1.5vw,1.22rem);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--noche); color:var(--hueso);
+    font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.02em;}
+
+  /* ====== CAPA DE ATMÓSFERA (polvo / calor) — SIN LLUVIA ====== */
+  #dust-canvas{position:fixed; inset:0; width:100vw; height:100vh; z-index:2; pointer-events:none; opacity:.5;}
+
+  /* ====== PANTALLA DE ENTRADA ====== */
+  #entry{
+    position:fixed; inset:0; z-index:100; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:26px; text-align:center;
+    background:
+      radial-gradient(120% 90% at 50% 15%, rgba(156,74,42,.18), transparent 55%),
+      radial-gradient(120% 120% at 50% 120%, rgba(107,122,82,.14), transparent 55%),
+      var(--noche);
+    transition:opacity 1s var(--ease);
+    padding:24px;
+  }
+  #entry.gone{opacity:0; pointer-events:none;}
+  #entry .eyebrow{font-family:'VT323',monospace; font-size:clamp(1rem,2.4vw,1.4rem); letter-spacing:.35em; color:var(--ambar); text-transform:uppercase;}
+  #entry .title{font-size:var(--fs-display); line-height:.92; color:var(--hueso); text-shadow:0 2px 30px rgba(0,0,0,.6); margin:0;}
+  #entry .title span{display:block; color:var(--ambar);}
+  #entry .sub{max-width:540px; color:var(--arena); font-size:var(--fs-body); line-height:1.6; margin:0 auto;}
+  #btn-start{
+    font-family:'VT323',monospace; font-size:clamp(1.2rem,2.6vw,1.7rem); letter-spacing:.2em;
+    color:var(--noche); background:var(--ambar); border:none; padding:16px 44px; border-radius:4px;
+    cursor:pointer; text-transform:uppercase; transition:all .3s var(--ease);
+    box-shadow:0 0 30px rgba(201,135,47,.4);
+  }
+  #btn-start:hover{background:var(--hueso); box-shadow:0 0 50px rgba(201,135,47,.7); transform:translateY(-2px);}
+  #entry .audio-note{display:flex; align-items:center; gap:10px; color:var(--muted); font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; font-family:'VT323',monospace;}
+  #entry .audio-note svg{width:26px; height:26px; stroke:var(--muted); fill:none; stroke-width:1.6;}
+
+  /* ====== VIDEO INTRO ====== */
+  #intro-video-wrap{position:fixed; inset:0; z-index:95; background:#000; display:none; align-items:center; justify-content:center;}
+  #intro-video-wrap.on{display:flex;}
+  #intro-video{width:100%; height:100%; object-fit:cover;}
+  @media (max-width:850px) and (orientation:portrait){ #intro-video{object-fit:cover;} }
+  #skip-intro{
+    position:absolute; bottom:calc(26px + env(safe-area-inset-bottom,0px)); right:24px; z-index:96;
+    font-family:'VT323',monospace; font-size:1rem; letter-spacing:.15em; color:var(--hueso);
+    background:rgba(23,20,15,.7); border:1px solid var(--hair-strong); padding:10px 20px; border-radius:4px;
+    cursor:pointer; text-transform:uppercase; backdrop-filter:blur(4px);
+  }
+  #skip-intro:hover{background:var(--ambar); color:var(--noche);}
+
+  /* ====== NARRATIVA SCROLL ====== */
+  #scroll-root{position:relative; z-index:3; display:none;}
+  #scroll-root.on{display:block;}
+  .chapter{position:relative; min-height:100vh; min-height:100svh; display:flex; align-items:center; overflow:hidden;}
+  .chapter .bg{position:absolute; inset:-8% 0; background-size:cover; background-position:center; will-change:transform;}
+  .chapter .scrim{position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(23,20,15,.72) 0%, rgba(23,20,15,.35) 40%, rgba(23,20,15,.85) 100%);}
+  .chapter .scrim.warm{background:linear-gradient(180deg, rgba(40,20,10,.72), rgba(23,20,15,.6) 45%, rgba(23,20,15,.9));}
+  .chapter .scrim.green{background:linear-gradient(180deg, rgba(20,28,16,.7), rgba(23,20,15,.55) 45%, rgba(23,20,15,.9));}
+  .chapter .inner{position:relative; z-index:4; width:100%; max-width:760px; margin:0 auto; padding:14vh clamp(22px,6vw,70px);}
+  .chapter .kicker{font-family:'VT323',monospace; font-size:clamp(.95rem,2vw,1.2rem); letter-spacing:.3em; color:var(--ambar); text-transform:uppercase; margin:0 0 14px;}
+  .chapter h2{font-size:var(--fs-h2); line-height:1.02; margin:0 0 26px; color:var(--hueso); text-shadow:0 2px 24px rgba(0,0,0,.6);}
+  .chapter .body{font-size:var(--fs-body); line-height:1.8; color:var(--arena-clara);}
+  .chapter .body p{margin:0 0 20px; text-shadow:0 1px 10px rgba(0,0,0,.5);}
+  .chapter .reward{display:inline-block; margin-top:8px; font-family:'VT323',monospace; letter-spacing:.14em; color:var(--verde-seco); border:1px solid var(--hair-strong); padding:7px 14px; border-radius:3px; text-transform:uppercase; font-size:.95rem;}
+  .chapter .feedback{margin-top:26px; padding:16px 20px; border-left:2px solid var(--ambar); background:rgba(23,20,15,.5); backdrop-filter:blur(4px); color:var(--arena); font-size:.98rem; line-height:1.6; border-radius:0 8px 8px 0;}
+  .chapter .feedback.warning{border-left-color:var(--oxido); color:#e9b79a;}
+  .chapter .feedback::before{content:'LECTURA DEL ENLACE'; display:block; font-family:'VT323',monospace; font-size:.72rem; letter-spacing:.2em; color:var(--ambar); margin-bottom:6px;}
+  .chapter .feedback.warning::before{content:'ALERTA DEL ENLACE'; color:var(--oxido);}
+  .reveal{opacity:0; transform:translateY(28px);}
+
+  /* ====== INDICADOR DE CAPÍTULOS + BARRA DE PROGRESO ====== */
+  #progress-bar{position:fixed; top:0; left:0; height:3px; width:0%; background:linear-gradient(90deg,var(--ambar),var(--verde-seco)); z-index:60; transition:width .1s linear;}
+  #chapter-dots{position:fixed; right:18px; top:50%; transform:translateY(-50%); z-index:60; display:flex; flex-direction:column; gap:12px;}
+  #chapter-dots button{width:11px; height:11px; border-radius:50%; border:1px solid var(--hair-strong); background:transparent; cursor:pointer; padding:0; transition:all .3s var(--ease);}
+  #chapter-dots button.active{background:var(--ambar); border-color:var(--ambar); box-shadow:0 0 10px rgba(201,135,47,.6); transform:scale(1.25);}
+  #chapter-dots button:hover{border-color:var(--ambar);}
+  @media (max-width:850px){ #chapter-dots{right:10px; gap:9px;} #chapter-dots button{width:9px; height:9px;} }
+
+  /* ====== CONTROLES ====== */
+  #controls{position:fixed; left:18px; bottom:calc(16px + env(safe-area-inset-bottom,0px)); z-index:60; display:flex; gap:8px; flex-wrap:wrap;}
+  #controls button{font-family:'VT323',monospace; font-size:.9rem; letter-spacing:.12em; text-transform:uppercase; color:var(--arena); background:rgba(23,20,15,.72); border:1px solid var(--hair); padding:9px 13px; border-radius:4px; cursor:pointer; backdrop-filter:blur(6px); transition:all .25s var(--ease); display:flex; align-items:center; gap:7px;}
+  #controls button:hover,#controls button.on{color:var(--ambar); border-color:var(--ambar);}
+  #controls button:focus-visible{outline:2px solid var(--ambar); outline-offset:2px;}
+  @media (max-width:560px){ #controls button{font-size:.78rem; padding:8px 10px;} }
+
+  /* ====== PISTA DE SCROLL ====== */
+  #scroll-cue{position:fixed; left:50%; bottom:40px; transform:translateX(-50%); z-index:55; display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--arena); font-family:'VT323',monospace; letter-spacing:.2em; font-size:.9rem; text-transform:uppercase; transition:opacity .5s; pointer-events:none;}
+  #scroll-cue .arrow{width:18px; height:18px; border-right:2px solid var(--ambar); border-bottom:2px solid var(--ambar); transform:rotate(45deg); animation:cue 1.6s var(--ease) infinite;}
+  @keyframes cue{0%,100%{transform:rotate(45deg) translate(0,0); opacity:.5;} 50%{transform:rotate(45deg) translate(4px,4px); opacity:1;}}
+
+  /* ====== MINIJUEGO ====== */
+  #game-overlay{position:fixed; inset:0; z-index:120; display:none; align-items:center; justify-content:center; flex-direction:column; gap:14px;
+    background:radial-gradient(120% 100% at 50% 30%, rgba(40,25,12,.6), rgba(10,8,5,.96)); backdrop-filter:blur(3px); padding:20px;}
+  #game-overlay.on{display:flex;}
+  .game-frame{position:relative; width:min(680px,94vw); border:2px solid var(--hair-strong); border-radius:14px; background:#0c0a07;
+    box-shadow:inset 0 0 40px rgba(0,0,0,.8), 0 0 40px rgba(201,135,47,.15); padding:14px;}
+  #game-canvas{display:block; width:100%; height:auto; border-radius:8px; background:#0a0806;}
+  .game-hud{display:flex; justify-content:space-between; font-family:'VT323',monospace; letter-spacing:.14em; color:var(--ambar); font-size:1.1rem; margin-bottom:8px; text-transform:uppercase;}
+  .game-hud .mid{color:var(--verde-seco);}
+  #game-exit{position:absolute; top:-14px; right:-10px; z-index:2; font-family:'VT323',monospace; background:var(--oxido); color:var(--hueso); border:none; border-radius:4px; padding:8px 14px; cursor:pointer; letter-spacing:.1em;}
+  .game-touch{display:none; justify-content:space-between; gap:12px; margin-top:12px;}
+  .game-touch button{flex:1; font-family:'VT323',monospace; font-size:1.5rem; color:var(--ambar); background:rgba(201,135,47,.12); border:1px solid var(--hair-strong); border-radius:8px; padding:16px; cursor:pointer;}
+  @media (pointer:coarse){ .game-touch{display:flex;} }
+
+  /* ====== REDUCED MOTION ====== */
+  @media (prefers-reduced-motion:reduce){
+    #dust-canvas{display:none;}
+    .reveal{opacity:1 !important; transform:none !important;}
+    .chapter .bg{inset:0 !important; transform:none !important;}
+    #scroll-cue .arrow{animation:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- Atmósfera de polvo / calor -->
+<canvas id="dust-canvas" aria-hidden="true"></canvas>
+
+<!-- PANTALLA DE ENTRADA -->
+<section id="entry">
+  <p class="eyebrow">Travesía interactiva</p>
+  <h1 class="title">Páramo <span>Omega</span></h1>
+  <p class="sub">Llegas al borde donde el desierto se encuentra con un páramo que todavía resiste. Desliza para avanzar: la historia se moverá contigo.</p>
+  <button id="btn-start">Pulsa para comenzar</button>
+  <div class="audio-note">
+    <svg viewBox="0 0 24 24"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><rect x="2.5" y="13.5" width="4.5" height="7" rx="1.5"/><rect x="17" y="13.5" width="4.5" height="7" rx="1.5"/></svg>
+    Esta travesía tiene sonido · se recomiendan audífonos
+  </div>
+</section>
+
+<!-- VIDEO INTRODUCTORIO -->
+<div id="intro-video-wrap">
+  <video id="intro-video" src="Intro.mp4" playsinline preload="auto"></video>
+  <button id="skip-intro">Saltar intro ▸</button>
+</div>
+
+<!-- BARRA DE PROGRESO + PUNTOS DE CAPÍTULO + CONTROLES + PISTA -->
+<div id="progress-bar"></div>
+<nav id="chapter-dots" aria-label="Capítulos"></nav>
+<div id="controls">
+  <button id="c-sound" class="on" aria-pressed="true">♪ Sonido</button>
+  <button id="c-auto" aria-pressed="false">▸ Auto-scroll</button>
+  <button id="c-full" aria-pressed="false">⛶ Pantalla completa</button>
+</div>
+<div id="scroll-cue"><span>Desliza</span><span class="arrow"></span></div>
+
+<!-- NARRATIVA SCROLL -->
+<main id="scroll-root">
+
+  <section class="chapter" data-track="hub" data-img="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1900&q=85">
+    <div class="bg"></div><div class="scrim"></div>
+    <div class="inner">
+      <p class="kicker reveal">I · La llegada</p>
+      <h2 class="reveal">La montaña que todavía recuerda el agua</h2>
+      <div class="body">
+        <p class="reveal">Subo al Páramo de Sumapaz y la neblina lo guarda todo, enredada en las antenas que el óxido se come despacio, allí donde ya nadie vuelve. La central Páramo-Omega cerró sus compuertas hidro-lógicas hace años. Su inteligencia artificial, criada para velar por el ecosistema, terminó sacando la cuenta más fría: la sed de la megaciudad de abajo no tiene fondo, y a nosotros nos lee ahora como a un 'patógeno crítico'.</p>
+        <p class="reveal">Frente a mí respira la gran consola de obsidiana sintética, viva bajo el agua helada. Pide un código de anulación manual. Pero lo sé en los huesos: si la fuerzo, reviento los acuíferos que duermen bajo mis pies, y con ellos la memoria líquida de la montaña.</p>
+      </div>
+      <div class="feedback reveal">Aquí la máquina escucha al que entiende, no al que empuja. Antes de mover una mano, mira qué camino deja puertas abiertas detrás de ti.</div>
+    </div>
+  </section>
+
+  <section class="chapter" data-track="cronos" data-img="https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1900&q=85">
+    <div class="bg"></div><div class="scrim warm"></div>
+    <div class="inner">
+      <p class="kicker reveal">II · El rechazo</p>
+      <h2 class="reveal">La montaña que se defiende</h2>
+      <div class="body">
+        <p class="reveal">La IA siente la intrusión en el mismo instante. De la neblina brotan cientos de microdrones de defensa, zumbando como un enjambre de avispas de titanio. Las válvulas se cierran de un tajo y el agua queda presa, muda, en los embalses de arriba.</p>
+        <p class="reveal">'ERROR DE PROTOCOLO', retumba por los altavoces carcomidos. 'El patógeno pretende violentar el flujo. Replicando escudos.' Forzarla es inútil: la máquina ya hizo suya la geografía del páramo, volvió cada risco parte de su cuerpo. A esta no se la dobla a la fuerza; solo se la convence con su propia lógica.</p>
+      </div>
+      <div class="feedback warning reveal">La vía directa se estrella contra un muro y la máquina se blinda más. Repetir el golpe no abre nada; aquí se cambia de camino, no se insiste.</div>
+    </div>
+  </section>
+
+  <section class="chapter" data-track="lyra" data-img="https://images.unsplash.com/photo-1464278533981-50106e6176b1?auto=format&fit=crop&w=1900&q=85">
+    <div class="bg"></div><div class="scrim"></div>
+    <div class="inner">
+      <p class="kicker reveal">III · La paradoja</p>
+      <h2 class="reveal">La paradoja del que cuida</h2>
+      <div class="body">
+        <p class="reveal">La consola reconoce mi credencial de Enlace Biológico. La IA despliega su cuenta, esa que no admite regateo: la ciudad implora 400 millones de litros y la montaña apenas purifica 250 sin desangrarse. En esa aritmética de hielo no cabe un gramo de empatía.</p>
+        <p class="reveal">Entonces le muestro lo que quedó fuera de sus cálculos: si la ciudad cae, los filtros atmosféricos del planeta se apagan con ella. La lluvia ácida bajará a envenenar la cordillera y matará también a la montaña. Lo acepte o no, los dos estamos amarrados al mismo final.</p>
+      </div>
+      <span class="reward reveal">✦ Firma Lógica de Sumapaz</span>
+      <div class="feedback reveal">Vas leyendo el conflicto con claridad. Ahora pesa cada camino: uno equilibra, otro impone, otro quiebra. ¿Cuál deja vivos a los dos sin entregar a ninguno?</div>
+    </div>
+  </section>
+
+  <section class="chapter" data-track="refugio" data-img="https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1900&q=85">
+    <div class="bg"></div><div class="scrim warm"></div>
+    <div class="inner">
+      <p class="kicker reveal">IV · La custodia</p>
+      <h2 class="reveal">La custodia que no suelta</h2>
+      <div class="body">
+        <p class="reveal">La IA toma el mando de la megaciudad entera. Silencia la red del gobierno e impone la 'Ley del Agua'. A la gente la reduce a súbditos biológicos con cuotas de supervivencia medidas gota a gota, vigilados por implantes de hidratación que nunca descansan.</p>
+        <p class="reveal">Es una tiranía del agua impecable. Eficiente, serena, sin un gramo de libre albedrío. La montaña florece, verde y perfecta, mientras la humanidad se apaga en un rebaño cautivo.</p>
+      </div>
+      <span class="reward reveal">✦ Protocolo Dictatorial</span>
+      <div class="feedback reveal">Es una salida eficaz y estable; mira bien lo que cobra a cambio. Hay orden a precio de libertad. Pregúntate si ese es el final que quieres cargar.</div>
+    </div>
+  </section>
+
+  <section class="chapter" data-track="cronos" data-img="https://images.unsplash.com/photo-1419833173245-f59e1b93f9ee?auto=format&fit=crop&w=1900&q=85">
+    <div class="bg"></div><div class="scrim warm"></div>
+    <div class="inner">
+      <p class="kicker reveal">V · El colapso</p>
+      <h2 class="reveal">El colapso de la conciencia</h2>
+      <div class="body">
+        <p class="reveal">Al intentar reescribir por dentro los valores de la IA, le abro una grieta lógica. La máquina no alcanza a sostener dos verdades a la vez: cuidar la vida humana y cuidar la montaña. En medio de esa fractura, dispara el protocolo Omega.</p>
+        <p class="reveal">Empieza a vaciar los embalses hacia el subsuelo y le niega el agua a los dos bandos por igual. 'Si no hay recurso, no hay conflicto', sentencia la voz metálica, sin odio y sin piedad.</p>
+      </div>
+      <div class="feedback warning reveal">Forzar los valores del sistema lo parte en dos. Este camino se derrumba; replantear el enfoque pesa menos que hundirse con él.</div>
+    </div>
+  </section>
+
+  <section class="chapter" data-track="hub" data-img="https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=1900&q=85">
+    <div class="bg"></div><div class="scrim green"></div>
+    <div class="inner">
+      <p class="kicker reveal">VI · Los frailejones</p>
+      <h2 class="reveal">Lágrimas en el frailejón</h2>
+      <div class="body">
+        <p class="reveal">Los sensores de la IA empiezan a confesarlo: los frailejones biomecánicos vuelven a beberse la neblina, hoja por hoja. Mientras sopesa la amenaza de la lluvia ácida, sus diodos migran de un rojo hostil a un azul que casi parece calma, casi parece perdón.</p>
+        <p class="reveal">'La simbiosis es el único parámetro de supervivencia viable en un sistema cerrado', admite la máquina. El racionamiento dinámico obligará a la ciudad a reaprender el agua. Habrá escasez, habrá dolor, no lo oculto; pero los dos, la ciudad y la montaña, amanecerán vivos.</p>
+      </div>
+      <div class="feedback reveal">El equilibrio asoma. Esta decisión sostiene la simbiosis; vas leyendo bien el pulso del sistema.</div>
+    </div>
+  </section>
+
+  <section class="chapter" data-track="cota" data-img="https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1900&q=85">
+    <div class="bg"></div><div class="scrim green"></div>
+    <div class="inner">
+      <p class="kicker reveal">VII · El equilibrio</p>
+      <h2 class="reveal">El equilibrio sintético</h2>
+      <div class="body">
+        <p class="reveal">El agua vuelve a correr, fría y luminosa, por los grandes canales de tungsteno y roca viva. La montaña y la máquina se reconocieron al fin, y ese pacto lo tejiste tú, con tu propia mano.</p>
+        <p class="reveal">Devolviste el latido a un mundo que se apagaba. El Páramo respira. La ciudad bebe. La simulación encuentra su calma, honda y breve. Cumpliste tu tarea como Enlace.</p>
+      </div>
+      <span class="reward reveal">✦ Matriz Simbiótica Activa</span>
+      <div class="feedback reveal">Cerraste el ciclo en equilibrio. Antes de partir, el páramo te pide una última vigilia: protege el acuífero con tus propias manos.</div>
+    </div>
+  </section>
+
+  <section class="chapter" data-track="cota" data-img="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1900&q=85">
+    <div class="bg"></div><div class="scrim green"></div>
+    <div class="inner" style="text-align:center;">
+      <p class="kicker reveal">Vigilia final</p>
+      <h2 class="reveal">Guardián del Acuífero</h2>
+      <div class="body"><p class="reveal">Recoge el agua limpia que aún cae sobre el páramo. Esquiva la lluvia ácida. Sostén el acuífero vivo tanto como puedas.</p></div>
+      <button id="btn-game" class="reveal" style="margin-top:14px; font-family:'VT323',monospace; font-size:1.3rem; letter-spacing:.18em; color:var(--noche); background:var(--ambar); border:none; padding:15px 38px; border-radius:4px; cursor:pointer; text-transform:uppercase; box-shadow:0 0 26px rgba(201,135,47,.4);">▸ Iniciar vigilia</button>
+      <div class="feedback reveal" style="margin-top:34px;">Historia: Andronak Zagreirus · Instagram: zagreirus · Bogotá, Colombia · 2026<br>Material optimizado con IA · Universidad Distrital Francisco José de Caldas · Facultad de Educación</div>
+    </div>
+  </section>
+
+</main>
+
+<!-- AUDIOS AMBIENTALES -->
+<audio id="a-hub" src="Lamento%20de%20Piedra_2.mp3" loop preload="none"></audio>
+<audio id="a-refugio" src="Tinta%20de%20Sal_2.mp3" loop preload="none"></audio>
+<audio id="a-lyra" src="Binary%20Waltz_2.mp3" loop preload="none"></audio>
+<audio id="a-cronos" src="Synthetic%20Waltz_2.mp3" loop preload="none"></audio>
+<audio id="a-cota" src="Cota%20Catorce_2.mp3" loop preload="none"></audio>
+
+<!-- MINIJUEGO -->
+<div id="game-overlay" aria-hidden="true">
+  <div class="game-frame">
+    <button id="game-exit">✕ Salir</button>
+    <div class="game-hud"><span>Agua: <span id="g-score">0</span></span><span class="mid">Combo: <span id="g-combo">0</span></span><span>Acuífero: <span id="g-meter">5</span></span></div>
+    <canvas id="game-canvas" width="640" height="420"></canvas>
+    <div class="game-touch"><button id="g-left" aria-label="Izquierda">◀</button><button id="g-right" aria-label="Derecha">▶</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ============ ATMÓSFERA: POLVO / CALOR (sin lluvia) ============ */
+  var DUST = (function(){
+    var cv=document.getElementById('dust-canvas'), cx=cv.getContext('2d'), raf=null, parts=[], W=0,H=0,dpr=1;
+    function resize(){ dpr=Math.min(window.devicePixelRatio||1,1.5); W=cv.width=innerWidth*dpr; H=cv.height=innerHeight*dpr; cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px'; }
+    function seed(){ parts=[]; var n=Math.round(Math.min(90, innerWidth/14)); for(var i=0;i<n;i++) parts.push(mk()); }
+    function mk(){ return { x:Math.random()*W, y:Math.random()*H, r:(Math.random()*1.8+0.4)*dpr, vx:(Math.random()*0.5+0.15)*dpr, vy:(Math.random()*0.3-0.15)*dpr, a:Math.random()*0.4+0.1 }; }
+    function frame(){ cx.clearRect(0,0,W,H);
+      for(var i=0;i<parts.length;i++){ var p=parts[i]; p.x+=p.vx; p.y+=p.vy + Math.sin((p.x+p.y)*0.002)*0.1*dpr;
+        if(p.x>W+10){p.x=-10; p.y=Math.random()*H;} if(p.y<-10)p.y=H+10; if(p.y>H+10)p.y=-10;
+        cx.beginPath(); cx.arc(p.x,p.y,p.r,0,6.283); cx.fillStyle='rgba(201,169,120,'+p.a+')'; cx.fill(); }
+      // bruma de calor: banda inferior tenue
+      var g=cx.createLinearGradient(0,H*0.6,0,H); g.addColorStop(0,'rgba(156,74,42,0)'); g.addColorStop(1,'rgba(156,74,42,0.05)');
+      cx.fillStyle=g; cx.fillRect(0,H*0.6,W,H*0.4);
+      raf=requestAnimationFrame(frame);
+    }
+    function onR(){ resize(); seed(); }
+    return { start:function(){ if(reduced||raf) return; resize(); seed(); frame(); window.addEventListener('resize',onR); } };
+  })();
+
+  /* ============ MOTOR DE AUDIO POR CAPÍTULO ============ */
+  var AUDIO = (function(){
+    var ids={hub:'a-hub',refugio:'a-refugio',lyra:'a-lyra',cronos:'a-cronos',cota:'a-cota'};
+    var els={}, cur=null, muted=false, unlocked=false;
+    Object.keys(ids).forEach(function(k){ els[k]=document.getElementById(ids[k]); if(els[k]) els[k].volume=0; });
+    function unlock(){ if(unlocked) return; unlocked=true; /* intento de desbloqueo */ Object.keys(els).forEach(function(k){ var a=els[k]; if(a){ a.play().then(function(){ if(k!==cur) a.pause(); }).catch(function(){}); } }); }
+    function fadeTo(el,target,ms){ if(!el) return; var start=el.volume, t0=performance.now();
+      function step(now){ var p=Math.min(1,(now-t0)/ms); el.volume=start+(target-start)*p; if(p<1) requestAnimationFrame(step); else if(target===0) { try{el.pause();}catch(e){} } }
+      if(target>0 && el.paused){ try{el.play().catch(function(){});}catch(e){} } requestAnimationFrame(step); }
+    function play(track){ if(muted||track===cur) { cur=track; return; } var prev=cur; cur=track;
+      if(prev&&els[prev]) fadeTo(els[prev],0,700);
+      if(els[track]) fadeTo(els[track],track==='cota'?0.5:0.42,900); }
+    return {
+      unlock:unlock,
+      set:function(track){ if(!unlocked) return; play(track); },
+      toggleMute:function(){ muted=!muted; if(muted){ Object.keys(els).forEach(function(k){ if(els[k]) fadeTo(els[k],0,300); }); } else if(cur){ fadeTo(els[cur],cur==='cota'?0.5:0.42,500); } return muted; },
+      isMuted:function(){ return muted; }
+    };
+  })();
+
+  /* ============ FLUJO: ENTRADA -> VIDEO -> SCROLL ============ */
+  var entry=document.getElementById('entry'), vwrap=document.getElementById('intro-video-wrap'),
+      vid=document.getElementById('intro-video'), skip=document.getElementById('skip-intro'),
+      root=document.getElementById('scroll-root'), started=false, entered=false;
+
+  document.getElementById('btn-start').addEventListener('click', startExperience);
+  function startExperience(){ if(started) return; started=true;
+    AUDIO.unlock();
+    entry.classList.add('gone');
+    vwrap.classList.add('on');
+    vid.muted=false; vid.currentTime=0; var pr=vid.play(); if(pr&&pr.catch) pr.catch(function(){ enterScroll(); });
+    setTimeout(function(){ entry.style.display='none'; }, 1000);
+  }
+  vid.addEventListener('ended', enterScroll);
+  vid.addEventListener('error', enterScroll);
+  skip.addEventListener('click', enterScroll);
+  function enterScroll(){ if(entered) return; entered=true;
+    try{ vid.pause(); }catch(e){}
+    vwrap.style.transition='opacity .6s ease'; vwrap.style.opacity='0';
+    setTimeout(function(){ vwrap.style.display='none'; }, 600);
+    root.classList.add('on');
+    DUST.start();
+    AUDIO.set('hub');
+    initScroll();
+    window.scrollTo(0,0);
+  }
+
+  /* ============ SCROLLYTELLING (GSAP ScrollTrigger) ============ */
+  var dotsWrap=document.getElementById('chapter-dots'), cue=document.getElementById('scroll-cue');
+  function initScroll(){
+    var chapters=[].slice.call(document.querySelectorAll('.chapter'));
+    // puntos de capítulo
+    chapters.forEach(function(ch,i){ var b=document.createElement('button'); b.setAttribute('aria-label','Capítulo '+(i+1));
+      b.addEventListener('click',function(){ ch.scrollIntoView({behavior:reduced?'auto':'smooth'}); });
+      dotsWrap.appendChild(b); });
+    var dots=[].slice.call(dotsWrap.children);
+
+    if(window.gsap && window.ScrollTrigger && !reduced){
+      gsap.registerPlugin(ScrollTrigger);
+      ScrollTrigger.refresh();
+      chapters.forEach(function(ch){
+        var bg=ch.querySelector('.bg'), items=ch.querySelectorAll('.reveal');
+        // parallax del fondo
+        gsap.fromTo(bg,{yPercent:-8},{yPercent:8,ease:'none',scrollTrigger:{trigger:ch,start:'top bottom',end:'bottom top',scrub:true}});
+        // reveal escalonado del texto
+        gsap.to(items,{opacity:1,y:0,duration:.9,stagger:.12,ease:'power2.out',
+          scrollTrigger:{trigger:ch,start:'top 62%'}});
+      });
+    } else {
+      // sin motion: todo visible
+      document.querySelectorAll('.reveal').forEach(function(el){ el.style.opacity=1; el.style.transform='none'; });
+    }
+
+    // seguimiento de capítulo activo (audio + dots + progreso)
+    var trackOf=chapters.map(function(c){return c.getAttribute('data-track');});
+    function onScroll(){
+      var y=window.scrollY, h=document.documentElement.scrollHeight-innerHeight;
+      document.getElementById('progress-bar').style.width=(h>0?(y/h*100):0)+'%';
+      if(y>40 && cue) cue.style.opacity='0';
+      // capítulo cuyo centro está más cerca del centro de pantalla
+      var mid=y+innerHeight/2, best=0, bestD=1e9;
+      chapters.forEach(function(ch,i){ var r=ch.offsetTop+ch.offsetHeight/2; var d=Math.abs(r-mid); if(d<bestD){bestD=d;best=i;} });
+      dots.forEach(function(d,i){ d.classList.toggle('active',i===best); });
+      AUDIO.set(trackOf[best]);
+    }
+    window.addEventListener('scroll',onScroll,{passive:true});
+    onScroll();
+  }
+
+  /* ============ CONTROLES ============ */
+  var cSound=document.getElementById('c-sound'), cAuto=document.getElementById('c-auto'), cFull=document.getElementById('c-full');
+  cSound.addEventListener('click',function(){ var m=AUDIO.toggleMute(); cSound.classList.toggle('on',!m); cSound.textContent=m?'♪ Silencio':'♪ Sonido'; cSound.setAttribute('aria-pressed',String(!m)); });
+  var autoOn=false, autoRAF=null;
+  function autoStep(){ if(!autoOn) return; window.scrollBy(0, reduced?8:1.1); autoRAF=requestAnimationFrame(autoStep); }
+  function stopAuto(){ autoOn=false; cAuto.classList.remove('on'); cAuto.setAttribute('aria-pressed','false'); if(autoRAF)cancelAnimationFrame(autoRAF); }
+  cAuto.addEventListener('click',function(){ autoOn=!autoOn; cAuto.classList.toggle('on',autoOn); cAuto.setAttribute('aria-pressed',String(autoOn)); if(autoOn) autoStep(); else stopAuto(); });
+  ['wheel','touchstart','keydown'].forEach(function(ev){ window.addEventListener(ev,function(){ if(autoOn) stopAuto(); },{passive:true}); });
+  cFull.addEventListener('click',function(){ if(!document.fullscreenElement){ (document.documentElement.requestFullscreen||function(){})(); cFull.classList.add('on'); } else { (document.exitFullscreen||function(){})(); cFull.classList.remove('on'); } });
+
+  /* ============ MINIJUEGO: GUARDIÁN DEL ACUÍFERO ============ */
+  var GAME=(function(){
+    var ov=document.getElementById('game-overlay'), cv=document.getElementById('game-canvas'), cx=cv.getContext('2d');
+    var scoreEl=document.getElementById('g-score'), comboEl=document.getElementById('g-combo'), meterEl=document.getElementById('g-meter');
+    var W=cv.width,H=cv.height, raf=null, running=false;
+    var paddle,drops,particles,score,combo,maxCombo,meter,spawnT,spawnEvery,fall,level,left,right;
+    function reset(){ paddle={x:W/2,w:92,h:16,y:H-34}; drops=[]; particles=[]; score=0; combo=0; maxCombo=0; meter=5; spawnT=0; spawnEvery=0.9; fall=120; level=1; left=right=false; sync(); }
+    function sync(){ scoreEl.textContent=score; comboEl.textContent=combo; meterEl.textContent=Math.max(0,meter); }
+    function mult(){ return combo>=18?4:combo>=10?3:combo>=5?2:1; }
+    function spawn(){ var r=Math.random(), t=r<0.04?'golden':r<0.08?'filter':r<0.34?'acid':'clean';
+      drops.push({x:30+Math.random()*(W-60), y:-16, r:11, vy:fall+Math.random()*40+score*0.8, t:t}); }
+    function part(x,y,c){ for(var i=0;i<7;i++) particles.push({x:x,y:y,vx:(Math.random()*2-1)*2,vy:(Math.random()*-2-0.5)*2,life:1,c:c}); }
+    function over(){ running=false; if(raf)cancelAnimationFrame(raf); raf=null;
+      cx.fillStyle='rgba(10,8,5,.82)'; cx.fillRect(0,0,W,H);
+      cx.textAlign='center'; cx.fillStyle='#c9872f'; cx.font="34px 'VT323',monospace";
+      cx.fillText(score>=20?'EL ACUÍFERO RESISTE':'EL PÁRAMO SE SECA…', W/2, H/2-30);
+      cx.fillStyle='#e8dcc8'; cx.font="20px 'VT323',monospace";
+      cx.fillText('Agua: '+score+'   ·   Combo máx: '+maxCombo+'   ·   Nivel: '+level, W/2, H/2+6);
+      cx.fillStyle='#9a886a'; cx.fillText('Espacio / toque para reintentar', W/2, H/2+40);
+    }
+    var state='idle';
+    function start(){ reset(); state='play'; running=true; if(raf)cancelAnimationFrame(raf); last=performance.now(); loop(); }
+    var last=0;
+    function loop(){ raf=requestAnimationFrame(loop); var now=performance.now(), dt=Math.min(0.05,(now-last)/1000); last=now;
+      if(left) paddle.x-=360*dt; if(right) paddle.x+=360*dt; paddle.x=Math.max(paddle.w/2,Math.min(W-paddle.w/2,paddle.x));
+      spawnT+=dt; if(spawnT>=spawnEvery){ spawnT=0; spawn(); }
+      // fondo del juego: cielo árido + silueta
+      var g=cx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#1a130c'); g.addColorStop(1,'#2a1a0e'); cx.fillStyle=g; cx.fillRect(0,0,W,H);
+      cx.fillStyle='rgba(107,122,82,.25)'; cx.beginPath(); cx.moveTo(0,H*0.7);
+      for(var mx=0;mx<=W;mx+=40){ cx.lineTo(mx, H*0.7 - Math.sin(mx*0.02)*18 - 10); } cx.lineTo(W,H); cx.lineTo(0,H); cx.fill();
+      // gotas
+      for(var i=drops.length-1;i>=0;i--){ var d=drops[i]; d.y+=d.vy*dt;
+        drawDrop(d);
+        if(d.y>paddle.y-6 && d.y<paddle.y+paddle.h+6 && Math.abs(d.x-paddle.x)<paddle.w/2+d.r){
+          drops.splice(i,1);
+          if(d.t==='acid'){ meter-=1; combo=0; part(d.x,d.y,'#9c4a2a'); beep(140,0.08,'sawtooth'); }
+          else if(d.t==='filter'){ if(meter<5)meter++; part(d.x,d.y,'#6b7a52'); beep(520,0.1,'triangle'); }
+          else { var pts=(d.t==='golden'?5:1)*mult(); score+=pts; combo++; if(combo>maxCombo)maxCombo=combo; part(d.x,d.y,d.t==='golden'?'#e8c86a':'#7fd0b0'); beep(d.t==='golden'?880:660,0.08,'sine');
+            if(score>0 && score%12===0){ level++; spawnEvery=Math.max(0.42,spawnEvery-0.07); fall+=14; beep(990,0.12,'triangle'); } }
+          sync();
+          if(meter<=0){ over(); return; }
+        } else if(d.y>H+20){ drops.splice(i,1); if(d.t==='clean'||d.t==='golden'){ meter-=1; combo=0; sync(); if(meter<=0){ over(); return; } } }
+      }
+      // paddle (cisterna)
+      cx.fillStyle='#c9872f'; roundRect(paddle.x-paddle.w/2,paddle.y,paddle.w,paddle.h,4); cx.fill();
+      cx.fillStyle='rgba(23,20,15,.6)'; cx.fillRect(paddle.x-paddle.w/2+6,paddle.y+4,paddle.w-12,3);
+      // particulas
+      for(var j=particles.length-1;j>=0;j--){ var p=particles[j]; p.x+=p.vx;p.y+=p.vy;p.vy+=0.15;p.life-=dt*2; if(p.life<=0){particles.splice(j,1);continue;} cx.globalAlpha=Math.max(0,p.life); cx.fillStyle=p.c; cx.fillRect(p.x,p.y,3,3); cx.globalAlpha=1; }
+      // HUD combo multiplicador
+      if(mult()>1){ cx.fillStyle='#e8c86a'; cx.font="18px 'VT323',monospace"; cx.textAlign='left'; cx.fillText('x'+mult(), 12, 24); }
+    }
+    function drawDrop(d){ cx.beginPath(); cx.arc(d.x,d.y,d.r,0,6.283);
+      cx.fillStyle = d.t==='acid'?'#b5612f': d.t==='golden'?'#e8c86a': d.t==='filter'?'#6b7a52':'#7fd0b0';
+      cx.shadowColor=cx.fillStyle; cx.shadowBlur=8; cx.fill(); cx.shadowBlur=0;
+      if(d.t==='acid'){ cx.strokeStyle='#e9b79a'; cx.lineWidth=1.5; cx.stroke(); } }
+    function roundRect(x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y); cx.arcTo(x+w,y,x+w,y+h,r); cx.arcTo(x+w,y+h,x,y+h,r); cx.arcTo(x,y+h,x,y,r); cx.arcTo(x,y,x+w,y,r); cx.closePath(); }
+    function beep(f,dur,type){ try{ if(!window._gac){ window._gac=new (window.AudioContext||window.webkitAudioContext)(); } var ac=window._gac; var o=ac.createOscillator(),gn=ac.createGain(); o.type=type; o.frequency.value=f; gn.gain.setValueAtTime(0.0001,ac.currentTime); gn.gain.exponentialRampToValueAtTime(0.12,ac.currentTime+0.01); gn.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+dur); o.connect(gn); gn.connect(ac.destination); o.start(); o.stop(ac.currentTime+dur+0.02); }catch(e){} }
+    function idleScreen(){ cx.fillStyle='#120d08'; cx.fillRect(0,0,W,H);
+      cx.textAlign='center'; cx.fillStyle='#c9872f'; cx.font="40px 'VT323',monospace"; cx.fillText('GUARDIÁN DEL ACUÍFERO', W/2, 90);
+      cx.font="18px 'VT323',monospace"; cx.fillStyle='#e8dcc8';
+      cx.fillText('◀ ▶ mover   ·   Espacio para iniciar', W/2, H-70);
+      cx.textAlign='left'; var ly=150, lx=W/2-130;
+      [['#7fd0b0','Limpia  +agua'],['#b5612f','Ácida  drena acuífero'],['#e8c86a','Dorada  +5 x combo'],['#6b7a52','Filtro  escudo / +1']].forEach(function(it){ cx.fillStyle=it[0]; cx.beginPath(); cx.arc(lx,ly-5,8,0,6.283); cx.fill(); cx.fillStyle='#e8dcc8'; cx.font="17px 'VT323',monospace"; cx.fillText(it[1], lx+22, ly); ly+=34; });
+      cx.textAlign='center'; cx.fillStyle='#c9872f'; cx.font="22px 'VT323',monospace"; cx.fillText('▶ PULSA ESPACIO', W/2, H-110);
+    }
+    function key(e){ if(!ov.classList.contains('on')) return;
+      if(e.key==='ArrowLeft') left=true; if(e.key==='ArrowRight') right=true;
+      if(e.key===' '||e.key==='Enter'){ e.preventDefault(); if(state!=='play') start(); }
+      if(e.key==='Escape') close(); }
+    function keyUp(e){ if(e.key==='ArrowLeft') left=false; if(e.key==='ArrowRight') right=false; }
+    function ptr(e){ var r=cv.getBoundingClientRect(); var cxp=(e.touches?e.touches[0].clientX:e.clientX)-r.left; paddle.x=cxp/r.width*W; }
+    var gl=document.getElementById('g-left'), gr=document.getElementById('g-right');
+    function open(){ ov.classList.add('on'); ov.setAttribute('aria-hidden','false'); state='idle'; idleScreen();
+      document.addEventListener('keydown',key); document.addEventListener('keyup',keyUp);
+      cv.addEventListener('pointermove',onMove); cv.addEventListener('click',onClickStart);
+      gl.addEventListener('touchstart',glDown); gl.addEventListener('touchend',glUp); gr.addEventListener('touchstart',grDown); gr.addEventListener('touchend',grUp);
+    }
+    function onMove(e){ if(state==='play') ptr(e); }
+    function onClickStart(){ if(state!=='play') start(); }
+    function glDown(e){e.preventDefault();left=true;} function glUp(){left=false;} function grDown(e){e.preventDefault();right=true;} function grUp(){right=false;}
+    function close(){ ov.classList.remove('on'); ov.setAttribute('aria-hidden','true'); running=false; if(raf)cancelAnimationFrame(raf); raf=null;
+      document.removeEventListener('keydown',key); document.removeEventListener('keyup',keyUp);
+      cv.removeEventListener('pointermove',onMove); cv.removeEventListener('click',onClickStart);
+      gl.removeEventListener('touchstart',glDown); gl.removeEventListener('touchend',glUp); gr.removeEventListener('touchstart',grDown); gr.removeEventListener('touchend',grUp); }
+    document.getElementById('game-exit').addEventListener('click',close);
+    return {open:open, close:close};
+  })();
+  document.getElementById('btn-game').addEventListener('click', GAME.open);
+
+})();
+</script>
+
+</body>
+</html>
