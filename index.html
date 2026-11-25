@@ -6,7 +6,7 @@
 <title>Páramo Omega · Travesía</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;500;700&family=Inter:wght@400;500;600&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;500;700&family=Inter:wght@400;500;600&family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231a140d'/%3E%3Cpath d='M32 12L49 22V42L32 52L15 42V22Z' fill='none' stroke='%23c9872f' stroke-width='3' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23c9872f'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -21,18 +21,35 @@
   h1,h2,.display{font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.01em;}
 
   /* atmósfera de arena */
-  #sand{position:fixed; inset:0; width:100vw; height:100vh; z-index:2; pointer-events:none; opacity:.55;}
+  #sand{position:fixed; inset:0; width:100vw; height:100vh; z-index:2; pointer-events:none; opacity:.55; transition:opacity 1s var(--ease);}
+  /* en la pantalla de entrada la arena se percibe un poco más (sutil), y vuelve a su nivel al entrar a la experiencia */
+  body:has(#entry:not(.gone)) #sand{opacity:.72;}
 
-  /* ENTRADA */
+  /* ENTRADA
+     Fondo transparente con solo el degradado radial de acento: el lienzo de arena (#sand, z-index 2)
+     queda por detrás del contenido de la entrada (z-index 100) pero por encima del --noche del body,
+     de modo que la textura de arena se percibe desde el arranque sin tapar el texto. */
   #entry{position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; text-align:center; padding:24px;
-    background:radial-gradient(120% 90% at 50% 20%, rgba(156,74,42,.14), transparent 55%), var(--noche); transition:opacity 1s var(--ease);}
+    background:radial-gradient(120% 90% at 50% 20%, rgba(156,74,42,.14), transparent 55%); transition:opacity 1s var(--ease);}
   #entry.gone{opacity:0; pointer-events:none;}
   #entry .eyebrow{font-family:'VT323',monospace; font-size:clamp(1rem,2.2vw,1.3rem); letter-spacing:.35em; color:var(--ambar); text-transform:uppercase;}
   #entry h1{font-size:var(--fs-display); line-height:.92; margin:0; color:var(--hueso);}
   #entry h1 span{display:block; color:var(--ambar);}
   #entry .sub{max-width:520px; color:var(--arena); font-size:var(--fs-body); line-height:1.6; margin:0 auto;}
-  #btn-start{font-family:'VT323',monospace; font-size:clamp(1.1rem,2.4vw,1.6rem); letter-spacing:.2em; color:var(--noche); background:var(--ambar); border:none; padding:15px 42px; border-radius:3px; cursor:pointer; text-transform:uppercase; transition:all .3s var(--ease); box-shadow:0 0 28px rgba(201,135,47,.35);}
+  #entry .start-row{display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:center;}
+  .start-btn,#btn-start,#btn-start-silent{font-family:'VT323',monospace; font-size:clamp(1.1rem,2.4vw,1.6rem); letter-spacing:.2em; border-radius:3px; cursor:pointer; text-transform:uppercase; transition:all .3s var(--ease); padding:15px 42px;}
+  #btn-start{color:var(--noche); background:var(--ambar); border:none; box-shadow:0 0 28px rgba(201,135,47,.35);}
   #btn-start:hover{background:var(--hueso); box-shadow:0 0 46px rgba(201,135,47,.6); transform:translateY(-2px);}
+  #btn-start-silent.ghost{color:var(--arena); background:transparent; border:1px solid var(--hair-s); box-shadow:none; padding:14px 34px;}
+  #btn-start-silent.ghost:hover{color:var(--ambar); border-color:var(--ambar); transform:translateY(-2px);}
+  #btn-start:disabled,#btn-start.loading,#btn-start-silent:disabled,#btn-start-silent.loading{cursor:progress; transform:none;}
+  #btn-start:disabled,#btn-start.loading{background:var(--arena); color:var(--noche); box-shadow:0 0 20px rgba(201,135,47,.22);}
+  #btn-start-silent:disabled,#btn-start-silent.loading{border-color:var(--hair); color:var(--muted);}
+  #btn-start.loading,#btn-start-silent.loading{display:inline-flex; align-items:center; gap:11px; justify-content:center;}
+  #btn-start .spin,#btn-start-silent .spin{display:inline-block; width:14px; height:14px; border:2px solid rgba(201,169,120,.35); border-top-color:var(--ambar); border-radius:50%; animation:btnspin .7s linear infinite;}
+  #btn-start .spin{border-color:rgba(20,17,12,.35); border-top-color:var(--noche);}
+  @keyframes btnspin{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion:reduce){ #btn-start .spin,#btn-start-silent .spin{animation:none;} }
   #entry .note{display:flex; align-items:center; gap:9px; color:var(--muted); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; font-family:'VT323',monospace;}
   #entry .note svg{width:24px; height:24px; stroke:var(--muted); fill:none; stroke-width:1.6;}
 
@@ -58,8 +75,45 @@
   #scene{position:relative; z-index:4; max-width:720px; margin:0 auto; padding:16vh clamp(22px,6vw,64px) 22vh; min-height:100vh; min-height:100svh;}
   .kicker{font-family:'VT323',monospace; font-size:clamp(.9rem,1.9vw,1.15rem); letter-spacing:.3em; color:var(--ambar); text-transform:uppercase; margin:0 0 12px;}
   #scene h2{font-size:var(--fs-h2); line-height:1.05; margin:0 0 24px; color:var(--hueso); text-shadow:0 2px 20px rgba(0,0,0,.55);}
-  .body{font-size:var(--fs-body); line-height:1.78; color:var(--arena-clara);}
+  .body{font-size:var(--fs-body); line-height:1.78; color:var(--arena-clara); overflow:hidden;}
   .body p{margin:0 0 18px; text-shadow:0 1px 8px rgba(0,0,0,.45);}
+
+  /* ===== TIPOGRAFÍAS POR RUTA =====
+     Hub / historia central (track-hub, track-cota): futurista y limpia (Orbitron en títulos).
+     Terminales (track-refugio, track-lyra, track-cronos): consola de los 80 (Share Tech Mono + VT323). */
+  .track-hub #scene .kicker,.track-cota #scene .kicker{font-family:'Orbitron','Oswald',sans-serif; letter-spacing:.28em;}
+  .track-hub #scene h2,.track-cota #scene h2{font-family:'Orbitron','Oswald',sans-serif; font-weight:700; letter-spacing:.02em;}
+  .track-hub #scene .body,.track-cota #scene .body{font-family:'Inter',system-ui,sans-serif;}
+
+  .track-refugio #scene .kicker,.track-lyra #scene .kicker,.track-cronos #scene .kicker{font-family:'Share Tech Mono','VT323',monospace; letter-spacing:.24em;}
+  .track-refugio #scene h2,.track-lyra #scene h2,.track-cronos #scene h2{font-family:'Share Tech Mono','VT323',monospace; font-weight:400; letter-spacing:.04em; text-transform:uppercase;}
+  .track-refugio #scene .body,.track-lyra #scene .body,.track-cronos #scene .body{font-family:'Share Tech Mono','VT323',monospace; letter-spacing:.01em; line-height:1.7;}
+
+  /* ===== EFECTOS DE TÍTULO POR RUTA (sutiles) =====
+     Hub: resplandor ámbar futurista. Terminales: glow de fósforo + scanline + parpadeo muy discreto. */
+  .track-hub #scene h2,.track-cota #scene h2{text-shadow:0 2px 20px rgba(0,0,0,.55), 0 0 18px rgba(201,135,47,.28);}
+  .track-refugio #scene h2{color:#f0b48a; text-shadow:0 0 2px rgba(240,180,138,.6), 0 0 14px rgba(156,74,42,.55);}
+  .track-lyra #scene h2{color:#9fe9c4; text-shadow:0 0 2px rgba(159,233,196,.6), 0 0 14px rgba(107,122,82,.55);}
+  .track-cronos #scene h2{color:#a9c6f0; text-shadow:0 0 2px rgba(169,198,240,.6), 0 0 14px rgba(42,90,160,.55);}
+  .track-refugio #scene h2,.track-lyra #scene h2,.track-cronos #scene h2{position:relative; animation:phosphor 4.2s steps(60) infinite;}
+  /* scanline de consola sobre el título de terminal */
+  .track-refugio #scene h2::after,.track-lyra #scene h2::after,.track-cronos #scene h2::after{
+    content:''; position:absolute; inset:0; pointer-events:none; opacity:.35;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px);}
+  @keyframes phosphor{0%,100%{opacity:1;} 48%{opacity:.97;} 50%{opacity:.9;} 52%{opacity:.98;}}
+
+  /* reveal lateral escalonado por párrafo (sutil): impares entran desde la izquierda, pares desde la derecha */
+  .body p.reveal{opacity:0; transform:translateX(-18px); transition:opacity .7s var(--ease), transform .7s var(--ease);}
+  .body p.reveal:nth-child(even){transform:translateX(18px);}
+  .body p.reveal.in{opacity:1; transform:translateX(0);}
+  /* ===== FLOTABILIDAD: micro-oscilación lateral continua, muy sutil, desfasada por párrafo =====
+     Se aplica solo cuando el párrafo YA entró (.in) para no reintroducir el desplazamiento de entrada.
+     La animación oscila alrededor de 0 (translateX(0)) para no saltar desde el estado final del reveal. */
+  .body p.reveal.in{animation:floatX 9s ease-in-out 1.2s infinite;}
+  .body p.reveal.in:nth-child(even){animation-duration:11s; animation-direction:alternate-reverse; animation-delay:1.6s;}
+  .body p.reveal.in:nth-child(3n){animation-duration:10s; animation-delay:2.1s;}
+  .body p.reveal.in:nth-child(3n+1){animation-duration:12s; animation-delay:1.9s;}
+  @keyframes floatX{0%{transform:translateX(0);} 25%{transform:translateX(-3px);} 50%{transform:translateX(0);} 75%{transform:translateX(3px);} 100%{transform:translateX(0);}}
   .analysis{margin:22px 0 0; padding:14px 18px; border-left:2px solid var(--verde); background:var(--panel); backdrop-filter:blur(4px); color:var(--arena); font-size:.95rem; line-height:1.55; border-radius:0 7px 7px 0;}
   .analysis::before{content:attr(data-label); display:block; font-family:'VT323',monospace; font-size:.7rem; letter-spacing:.2em; color:var(--ambar); margin-bottom:5px;}
   .reward{display:inline-block; margin-top:16px; font-family:'VT323',monospace; letter-spacing:.14em; color:var(--verde); border:1px solid var(--hair-s); padding:6px 13px; border-radius:3px; text-transform:uppercase; font-size:.9rem;}
@@ -111,6 +165,9 @@
 
   @media (prefers-reduced-motion:reduce){
     #sand{display:none;} #bg{transform:none !important; transition:none;} .fade-in{animation:none;} .choice:hover{transform:none;}
+    .body p.reveal{opacity:1 !important; transform:none !important; transition:none !important;}
+    .body p.reveal.in{animation:none !important;}
+    .track-refugio #scene h2,.track-lyra #scene h2,.track-cronos #scene h2{animation:none !important;}
   }
 </style>
 </head>
@@ -122,7 +179,10 @@
   <p class="eyebrow">Travesía interactiva</p>
   <h1>Páramo <span>Omega</span></h1>
   <p class="sub">Llegas al borde donde el desierto roza un páramo que aún resiste. Cada decisión abre un camino distinto. Elige, y la ruta se abrirá bajo tus pasos.</p>
-  <button id="btn-start">Pulsa para comenzar</button>
+  <div class="start-row">
+    <button id="btn-start" data-sound="1">Entrar con sonido</button>
+    <button id="btn-start-silent" class="ghost" data-sound="0">Entrar en silencio</button>
+  </div>
   <div class="note"><svg viewBox="0 0 24 24"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><rect x="2.5" y="13.5" width="4.5" height="7" rx="1.5"/><rect x="17" y="13.5" width="4.5" height="7" rx="1.5"/></svg> Esta travesía tiene sonido · se recomiendan audífonos</div>
 </section>
 
@@ -283,19 +343,69 @@ var AUDIO=(function(){
   var ids=['a-hub','a-refugio','a-lyra','a-cronos','a-cota'], els={}, cur=null, muted=false, un=false;
   ids.forEach(function(id){ els[id]=document.getElementById(id); if(els[id]) els[id].volume=0; });
   function fade(el,to,ms){ if(!el)return; var s=el.volume,t0=performance.now(); if(to>0&&el.paused){try{el.play().catch(function(){});}catch(e){}}
-    (function st(now){ var p=Math.min(1,(now-t0)/ms); el.volume=s+(to-s)*p; if(p<1)requestAnimationFrame(st); else if(to===0){try{el.pause();}catch(e){}} })(t0); }
+    (function st(now){ var p=Math.min(1,(now-t0)/ms); el.volume=Math.max(0,Math.min(1,s+(to-s)*p)); if(p<1)requestAnimationFrame(st); else if(to===0){try{el.pause();}catch(e){}} })(t0); }
   return { unlock:function(){ if(un)return; un=true; ids.forEach(function(id){var a=els[id]; if(a){a.play().then(function(){ if(id!==cur)a.pause(); }).catch(function(){});}}); },
     set:function(id){ if(!un||muted||id===cur)return; var prev=cur; cur=id; if(prev&&els[prev])fade(els[prev],0,700); if(els[id])fade(els[id],id==='a-cota'?0.5:0.42,900); },
     curSet:function(id){ cur=id; },
-    toggle:function(){ muted=!muted; if(muted){ids.forEach(function(k){if(els[k])fade(els[k],0,300);});} else if(cur){fade(els[cur],cur==='a-cota'?0.5:0.42,500);} return muted; } };
+    toggle:function(){ muted=!muted; if(muted){ids.forEach(function(k){if(els[k])fade(els[k],0,300);});} else if(cur){fade(els[cur],cur==='a-cota'?0.5:0.42,500);} return muted; },
+    // fija el estado de silencio directamente (usado por "Entrar en silencio"); no requiere unlock previo
+    mute:function(m){ muted=!!m; if(muted){ids.forEach(function(k){if(els[k])fade(els[k],0,200);});} else if(cur){fade(els[cur],cur==='a-cota'?0.5:0.42,500);} return muted; },
+    isMuted:function(){ return muted; } };
+})();
+
+/* ====== VIENTO DE PÁRAMO (Web Audio, sin archivos) ======
+   Ambiente de viento frío generado por ruido filtrado. Un buffer de ruido (rosa aprox.)
+   en bucle pasa por un pasa-bajos y un pasa-banda; dos LFO lentos modulan la frecuencia
+   del filtro y la ganancia para que "sople" y varíe. Volumen bajo, pensado como fondo.
+   Reutiliza el AudioContext window._ac (el mismo de los beeps del minijuego). Un AudioContext
+   arranca 'suspended' hasta un gesto: WIND.start() hace resume() dentro del click de entrada. */
+var WIND=(function(){
+  var ac=null, src=null, master=null, running=false, baseVol=0.14, muted=false;
+  function ctx(){ if(!window._ac){ try{ window._ac=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; } } return window._ac; }
+  function noiseBuffer(a){
+    var len=a.sampleRate*4, buf=a.createBuffer(1,len,a.sampleRate), d=buf.getChannelData(0);
+    // ruido rosa aproximado (Paul Kellet) para un siseo más suave que el blanco
+    var b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+    for(var i=0;i<len;i++){ var w=Math.random()*2-1;
+      b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759; b2=0.96900*b2+w*0.1538520;
+      b3=0.86650*b3+w*0.3104856; b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.0168980;
+      d[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11; b6=w*0.115926; }
+    return buf;
+  }
+  function build(){
+    ac=ctx(); if(!ac) return false;
+    master=ac.createGain(); master.gain.value=0; master.connect(ac.destination);
+    src=ac.createBufferSource(); src.buffer=noiseBuffer(ac); src.loop=true;
+    var lp=ac.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=620; lp.Q.value=0.5;
+    var bp=ac.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=480; bp.Q.value=0.7;
+    // LFO de frecuencia: el filtro "barre" lento, como ráfagas que suben y bajan
+    var lfoF=ac.createOscillator(); lfoF.type='sine'; lfoF.frequency.value=0.07;
+    var lfoFg=ac.createGain(); lfoFg.gain.value=260; lfoF.connect(lfoFg); lfoFg.connect(bp.frequency);
+    // LFO de ganancia: el soplido respira
+    var lfoG=ac.createOscillator(); lfoG.type='sine'; lfoG.frequency.value=0.11;
+    var lfoGg=ac.createGain(); lfoGg.gain.value=0.5; var gBreath=ac.createGain(); gBreath.gain.value=0.55;
+    lfoG.connect(lfoGg); lfoGg.connect(gBreath.gain);
+    src.connect(lp); lp.connect(bp); bp.connect(gBreath); gBreath.connect(master);
+    src.start(0); lfoF.start(0); lfoG.start(0);
+    return true;
+  }
+  function ramp(to,ms){ if(!master||!ac)return; var now=ac.currentTime; try{ master.gain.cancelScheduledValues(now); master.gain.setValueAtTime(master.gain.value,now); master.gain.linearRampToValueAtTime(to,now+ms/1000); }catch(e){ master.gain.value=to; } }
+  return {
+    start:function(){ if(running)return; ac=ctx(); if(!ac)return; if(ac.state==='suspended'){try{ac.resume();}catch(e){}} if(!src){ if(!build())return; } running=true; if(!muted) ramp(baseVol,1600); },
+    stop:function(){ if(!running)return; running=false; ramp(0,900); },
+    // fade a un nivel aún más bajo para convivir bajo la música de pista
+    duck:function(){ if(running&&!muted) ramp(baseVol*0.35,1400); },
+    setMuted:function(m){ muted=!!m; if(!running)return; ramp(muted?0:baseVol,500); },
+    isRunning:function(){ return running; }
+  };
 })();
 
 /* ====== ARENA (atmósfera, NO lluvia) ====== */
 var SAND=(function(){
   var cv=document.getElementById('sand'),cx=cv.getContext('2d'),raf=null,parts=[],W,H,dpr;
   function rz(){ dpr=Math.min(devicePixelRatio||1,1.5); W=cv.width=innerWidth*dpr; H=cv.height=innerHeight*dpr; cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px'; }
-  function seed(){ parts=[]; var n=Math.round(Math.min(110,innerWidth/11)); for(var i=0;i<n;i++)parts.push(mk(true)); }
-  function mk(any){ return {x:any?Math.random()*W:-10, y:Math.random()*H, r:(Math.random()*1.7+0.4)*dpr, vx:(Math.random()*0.9+0.4)*dpr, vy:(Math.random()*0.4-0.2)*dpr, a:Math.random()*0.45+0.12}; }
+  function seed(){ parts=[]; var n=Math.round(Math.min(130,innerWidth/9)); for(var i=0;i<n;i++)parts.push(mk(true)); }
+  function mk(any){ return {x:any?Math.random()*W:-10, y:Math.random()*H, r:(Math.random()*1.7+0.4)*dpr, vx:(Math.random()*0.9+0.4)*dpr, vy:(Math.random()*0.4-0.2)*dpr, a:Math.random()*0.5+0.14}; }
   function fr(){ cx.clearRect(0,0,W,H);
     for(var i=0;i<parts.length;i++){var p=parts[i]; p.x+=p.vx; p.y+=p.vy+Math.sin((p.x+p.y)*0.003)*0.14*dpr; if(p.x>W+12){p.x=-10;p.y=Math.random()*H;} if(p.y<-12)p.y=H+10; if(p.y>H+12)p.y=-10;
       cx.beginPath(); cx.arc(p.x,p.y,p.r,0,6.283); cx.fillStyle='rgba(201,169,120,'+p.a+')'; cx.fill();}
@@ -311,6 +421,26 @@ var stage=document.getElementById('stage'), bg=document.getElementById('bg'), sc
     routes=document.getElementById('routes'), ctrl=document.getElementById('ctrl');
 var HUB_ORDER=['llegada_paramo','debate_logico','diagnostico_humedad','equilibrio_alcanzado'];
 var history=[];
+
+// Observer del reveal lateral por párrafo; se recrea en cada escena y se limpia el anterior para no acumular.
+var revealObserver=null;
+function revealParagraphs(){
+  if(revealObserver){ revealObserver.disconnect(); revealObserver=null; }
+  var ps=[].slice.call(scene.querySelectorAll('.body p'));
+  if(!ps.length) return;
+  if(reduced){ ps.forEach(function(p){ p.classList.remove('reveal','in'); }); return; }
+  ps.forEach(function(p){ p.classList.add('reveal'); p.classList.remove('in'); });
+  revealObserver=new IntersectionObserver(function(entries,obs){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var p=e.target, idx=ps.indexOf(p);
+      p.style.transitionDelay=(Math.max(0,idx)*90)+'ms';
+      p.classList.add('in');
+      obs.unobserve(p);
+    });
+  },{threshold:0.1});
+  ps.forEach(function(p){ revealObserver.observe(p); });
+}
 
 function render(id, pushHist){
   var s=G[id]; if(!s) return;
@@ -331,6 +461,8 @@ function render(id, pushHist){
   html+='</div>';
   scene.innerHTML=html;
   scene.classList.remove('fade-in'); void scene.offsetWidth; if(!reduced) scene.classList.add('fade-in');
+  // reveal lateral escalonado de los párrafos del cuerpo narrativo
+  revealParagraphs();
   // listeners de elección
   [].slice.call(scene.querySelectorAll('.choice')).forEach(function(b){
     b.addEventListener('click',function(){ var go=b.getAttribute('data-go'); transitionTo(go); });
@@ -353,15 +485,59 @@ function refreshRoutes(){
 }
 
 /* ====== FLUJO DE ENTRADA ====== */
-var entry=document.getElementById('entry'), vwrap=document.getElementById('vwrap'), vid=document.getElementById('vid'), skip=document.getElementById('skip'), started=false, entered=false;
-document.getElementById('btn-start').addEventListener('click',function(){ if(started)return; started=true; AUDIO.unlock(); entry.classList.add('gone'); vwrap.classList.add('on'); vid.muted=false; vid.currentTime=0; var pr=vid.play(); if(pr&&pr.catch)pr.catch(enter); setTimeout(function(){entry.style.display='none';},1000); });
-vid.addEventListener('ended',enter); vid.addEventListener('error',enter); skip.addEventListener('click',enter);
-function enter(){ if(entered)return; entered=true; try{vid.pause();}catch(e){} vwrap.style.transition='opacity .6s ease'; vwrap.style.opacity='0'; setTimeout(function(){vwrap.style.display='none';},600);
-  SAND.start(); AUDIO.curSet(null); AUDIO.set('a-hub'); hud.style.display='flex'; ctrl.style.display='flex'; routes.style.display='flex'; render('llegada_paramo'); }
+// La atmósfera de arena arranca desde la pantalla de entrada (coherente con el resto de la experiencia).
+// SAND.start() se autoinhibe con prefers-reduced-motion y es idempotente, así que repetirlo en enter() es seguro.
+SAND.start();
+var entry=document.getElementById('entry'), vwrap=document.getElementById('vwrap'), vid=document.getElementById('vid'), skip=document.getElementById('skip'),
+    btnStart=document.getElementById('btn-start'), btnSilent=document.getElementById('btn-start-silent'),
+    started=false, entered=false, playing=false, loadTO=null, withSound=true;
+
+// Arranca la reproducción del video de intro una vez que hay datos suficientes (o tras el fallback de timeout).
+function beginPlayback(){ if(playing||entered)return; playing=true; if(loadTO){clearTimeout(loadTO); loadTO=null;}
+  vid.removeEventListener('canplaythrough',beginPlayback); vid.removeEventListener('canplay',beginPlayback);
+  entry.classList.add('gone'); vwrap.classList.add('on'); vid.muted=!withSound; try{vid.currentTime=0;}catch(e){}
+  var pr=vid.play(); if(pr&&pr.catch)pr.catch(enter); setTimeout(function(){entry.style.display='none';},1000); }
+
+// Flujo de entrada compartido por los dos botones. wantSound decide si se desbloquea el audio y arranca el viento.
+// El desbloqueo de audio y el arranque del viento ocurren DENTRO del gesto de click (requisito en móvil): no lo muevas.
+function beginEntry(wantSound,btn){
+  if(started)return; started=true; withSound=!!wantSound;
+  if(withSound){ AUDIO.unlock(); WIND.start(); if(soundMuted){ soundMuted=false; reflectSound(); } }
+  else { AUDIO.mute(true); soundMuted=true; reflectSound(); }
+  // Estado de carga: feedback mientras Intro.mp4 (~8.6 MB) precarga, para que no parezca que la experiencia se rompió.
+  // Ambos botones dan feedback: el pulsado muestra spinner, el otro se deshabilita.
+  var other=(btn===btnStart)?btnSilent:btnStart;
+  btn.disabled=true; btn.classList.add('loading'); btn.innerHTML='<span class="spin" aria-hidden="true"></span>Cargando…'; btn.setAttribute('aria-busy','true');
+  if(other){ other.disabled=true; other.style.opacity='.5'; }
+  try{vid.preload='auto'; vid.load();}catch(e){}
+  if(vid.readyState>=3){ beginPlayback(); return; }
+  vid.addEventListener('canplaythrough',beginPlayback); vid.addEventListener('canplay',beginPlayback);
+  // Fallback: si el evento no dispara (red lenta, navegador que no precarga), arranca igual tras 8 s para no dejar al usuario atascado.
+  loadTO=setTimeout(beginPlayback,8000);
+}
+btnStart.addEventListener('click',function(){ beginEntry(true,btnStart); });
+btnSilent.addEventListener('click',function(){ beginEntry(false,btnSilent); });
+
+vid.addEventListener('ended',enter); vid.addEventListener('error',function(){ if(loadTO){clearTimeout(loadTO); loadTO=null;} enter(); }); skip.addEventListener('click',enter);
+function enter(){ if(entered)return; entered=true; if(loadTO){clearTimeout(loadTO); loadTO=null;}
+  vid.removeEventListener('canplaythrough',beginPlayback); vid.removeEventListener('canplay',beginPlayback);
+  try{vid.pause();}catch(e){} vwrap.style.transition='opacity .6s ease'; vwrap.style.opacity='0'; setTimeout(function(){vwrap.style.display='none';},600);
+  SAND.start(); AUDIO.curSet(null); AUDIO.set('a-hub');
+  // Al entrar a la experiencia, si el viento sigue activo lo bajamos (duck) para que conviva bajo la música de pista.
+  if(withSound) WIND.duck();
+  hud.style.display='flex'; ctrl.style.display='flex'; routes.style.display='flex'; render('llegada_paramo'); }
 
 /* ====== CONTROLES ====== */
 var cSound=document.getElementById('c-sound');
-cSound.addEventListener('click',function(){ var m=AUDIO.toggle(); cSound.classList.toggle('on',!m); cSound.textContent=m?'♪ Silencio':'♪ Sonido'; cSound.setAttribute('aria-pressed',String(!m)); });
+var soundMuted=false;
+// Refleja en el botón #c-sound el estado de silencio actual (compartido con los botones de entrada).
+function reflectSound(){ cSound.classList.toggle('on',!soundMuted); cSound.textContent=soundMuted?'♪ Silencio':'♪ Sonido'; cSound.setAttribute('aria-pressed',String(!soundMuted)); }
+cSound.addEventListener('click',function(){
+  soundMuted=AUDIO.toggle();
+  // Si el usuario entró con sonido y el viento sigue activo, el toggle también lo silencia/restaura.
+  WIND.setMuted(soundMuted);
+  reflectSound();
+});
 document.getElementById('c-full').addEventListener('click',function(){ if(!document.fullscreenElement){ if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen(); this.classList.add('on'); } else { if(document.exitFullscreen)document.exitFullscreen(); this.classList.remove('on'); } });
 
 /* ====== MINIJUEGO: GUARDIÁN DEL ACUÍFERO ====== */
