@@ -66,8 +66,12 @@
   #scene{position:relative; z-index:4; max-width:720px; margin:0 auto; padding:16vh clamp(22px,6vw,64px) 22vh; min-height:100vh; min-height:100svh;}
   .kicker{font-family:'VT323',monospace; font-size:clamp(.9rem,1.9vw,1.15rem); letter-spacing:.3em; color:var(--ambar); text-transform:uppercase; margin:0 0 12px;}
   #scene h2{font-size:var(--fs-h2); line-height:1.05; margin:0 0 24px; color:var(--hueso); text-shadow:0 2px 20px rgba(0,0,0,.55);}
-  .body{font-size:var(--fs-body); line-height:1.78; color:var(--arena-clara);}
+  .body{font-size:var(--fs-body); line-height:1.78; color:var(--arena-clara); overflow:hidden;}
   .body p{margin:0 0 18px; text-shadow:0 1px 8px rgba(0,0,0,.45);}
+  /* reveal lateral escalonado por párrafo (sutil): impares entran desde la izquierda, pares desde la derecha */
+  .body p.reveal{opacity:0; transform:translateX(-18px); transition:opacity .7s var(--ease), transform .7s var(--ease);}
+  .body p.reveal:nth-child(even){transform:translateX(18px);}
+  .body p.reveal.in{opacity:1; transform:translateX(0);}
   .analysis{margin:22px 0 0; padding:14px 18px; border-left:2px solid var(--verde); background:var(--panel); backdrop-filter:blur(4px); color:var(--arena); font-size:.95rem; line-height:1.55; border-radius:0 7px 7px 0;}
   .analysis::before{content:attr(data-label); display:block; font-family:'VT323',monospace; font-size:.7rem; letter-spacing:.2em; color:var(--ambar); margin-bottom:5px;}
   .reward{display:inline-block; margin-top:16px; font-family:'VT323',monospace; letter-spacing:.14em; color:var(--verde); border:1px solid var(--hair-s); padding:6px 13px; border-radius:3px; text-transform:uppercase; font-size:.9rem;}
@@ -119,6 +123,7 @@
 
   @media (prefers-reduced-motion:reduce){
     #sand{display:none;} #bg{transform:none !important; transition:none;} .fade-in{animation:none;} .choice:hover{transform:none;}
+    .body p.reveal{opacity:1 !important; transform:none !important; transition:none !important;}
   }
 </style>
 </head>
@@ -320,6 +325,26 @@ var stage=document.getElementById('stage'), bg=document.getElementById('bg'), sc
 var HUB_ORDER=['llegada_paramo','debate_logico','diagnostico_humedad','equilibrio_alcanzado'];
 var history=[];
 
+// Observer del reveal lateral por párrafo; se recrea en cada escena y se limpia el anterior para no acumular.
+var revealObserver=null;
+function revealParagraphs(){
+  if(revealObserver){ revealObserver.disconnect(); revealObserver=null; }
+  var ps=[].slice.call(scene.querySelectorAll('.body p'));
+  if(!ps.length) return;
+  if(reduced){ ps.forEach(function(p){ p.classList.remove('reveal','in'); }); return; }
+  ps.forEach(function(p){ p.classList.add('reveal'); p.classList.remove('in'); });
+  revealObserver=new IntersectionObserver(function(entries,obs){
+    entries.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var p=e.target, idx=ps.indexOf(p);
+      p.style.transitionDelay=(Math.max(0,idx)*90)+'ms';
+      p.classList.add('in');
+      obs.unobserve(p);
+    });
+  },{threshold:0.1});
+  ps.forEach(function(p){ revealObserver.observe(p); });
+}
+
 function render(id, pushHist){
   var s=G[id]; if(!s) return;
   if(id==='__game__'){ GAME.open(); return; }
@@ -339,6 +364,8 @@ function render(id, pushHist){
   html+='</div>';
   scene.innerHTML=html;
   scene.classList.remove('fade-in'); void scene.offsetWidth; if(!reduced) scene.classList.add('fade-in');
+  // reveal lateral escalonado de los párrafos del cuerpo narrativo
+  revealParagraphs();
   // listeners de elección
   [].slice.call(scene.querySelectorAll('.choice')).forEach(function(b){
     b.addEventListener('click',function(){ var go=b.getAttribute('data-go'); transitionTo(go); });
