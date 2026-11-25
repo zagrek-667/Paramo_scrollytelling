@@ -14,6 +14,8 @@
     --verde:#6b7a52; --noche:#14110c; --panel:rgba(20,17,12,.55); --hueso:#e8dcc8;
     --muted:#9a886a; --hair:rgba(201,169,120,.18); --hair-s:rgba(201,169,120,.34);
     --ease:cubic-bezier(.22,.61,.36,1);
+    /* easing con overshoot (rebote sutil) para la apertura tipo "ventana de sistema operativo" */
+    --ease-win:cubic-bezier(.16,1.18,.3,1);
     --fs-display:clamp(2.4rem,7vw,5.4rem); --fs-h2:clamp(1.5rem,4vw,2.7rem); --fs-body:clamp(1rem,1.4vw,1.18rem);
   }
   *{box-sizing:border-box;}
@@ -152,9 +154,15 @@
 
   /* controles */
   #ctrl{position:fixed; left:16px; bottom:calc(16px + env(safe-area-inset-bottom,0px)); z-index:50; display:flex; gap:8px; flex-wrap:wrap;}
-  #ctrl button{font-family:'VT323',monospace; font-size:.85rem; letter-spacing:.1em; text-transform:uppercase; color:var(--arena); background:rgba(20,17,12,.68); border:1px solid var(--hair); padding:9px 12px; border-radius:4px; cursor:pointer; backdrop-filter:blur(6px); transition:all .25s var(--ease);}
+  #ctrl button{font-family:'VT323',monospace; font-size:.85rem; letter-spacing:.1em; text-transform:uppercase; color:var(--arena); background:rgba(20,17,12,.68); border:1px solid var(--hair); padding:9px 12px; border-radius:4px; cursor:pointer; backdrop-filter:blur(6px); transition:all .25s var(--ease); min-height:40px;}
   #ctrl button:hover,#ctrl button.on{color:var(--ambar); border-color:var(--ambar);}
   #ctrl button:focus-visible{outline:2px solid var(--ambar); outline-offset:2px;}
+  #ctrl button:disabled{cursor:not-allowed;}
+  /* objetivo táctil ≥44px en dispositivos de puntero grueso (móvil/tablet) */
+  @media (pointer:coarse){ #ctrl button,#routes button{min-height:44px;} }
+  /* en pantallas estrechas, los controles no deben amontonarse ni tapar el contenido:
+     #ctrl ocupa hasta media pantalla y envuelve; #routes queda a la derecha. */
+  @media (max-width:640px){ #ctrl{max-width:56vw; gap:6px;} #ctrl button{font-size:.72rem; letter-spacing:.06em; padding:8px 9px;} }
 
   /* mapa de rutas (acceso a terminales / caminos) */
   #routes{position:fixed; right:16px; bottom:calc(16px + env(safe-area-inset-bottom,0px)); z-index:50; display:flex; flex-direction:column; gap:7px; align-items:flex-end;}
@@ -170,6 +178,42 @@
   .fade-in{animation:fadeIn .7s var(--ease) both;}
   @keyframes fadeIn{from{opacity:0; transform:translateY(22px);} to{opacity:1; transform:none;}}
 
+  /* ===== ANIMACIÓN "VENTANA DE SISTEMA OPERATIVO" =====
+     Al entrar una escena, la tarjeta y sus paneles "abren" como ventanas: escalan desde ~0.9
+     con un leve desplazamiento vertical y un overshoot (rebote) sutil vía --ease-win. Más
+     marcado que el fade anterior. La animación vive en un wrapper (#scene.win-open) y en los
+     paneles (.choice/.analysis), NUNCA en los <p> del cuerpo: así no pelea con el
+     transform de la lectura por scroll (updateReadingFocus escribe --rf-ty en .body p).
+     transform-origin alto para que "crezcan" desde la parte superior, como una ventana que se despliega. */
+  #scene.win-open{animation:winOpen .62s var(--ease-win) both; transform-origin:50% 12%;}
+  @keyframes winOpen{
+    0%{opacity:0; transform:translateY(34px) scale(.9);}
+    60%{opacity:1;}
+    100%{opacity:1; transform:translateY(0) scale(1);}
+  }
+  /* los paneles (opciones, análisis, tarjeta de créditos) se despliegan en secuencia (stagger).
+     fill-mode: backwards (no both) para que al terminar la animación el elemento vuelva a su regla
+     base y el transform de :hover (translateX en .choice) o la flotación de .credits-card funcionen. */
+  .win-open .choice,.win-open .analysis{animation:panelPop .5s var(--ease-win) backwards;}
+  @keyframes panelPop{
+    0%{opacity:0; transform:translateY(26px) scale(.94);}
+    100%{opacity:1; transform:translateY(0) scale(1);}
+  }
+  .win-open .analysis{animation-delay:.08s;}
+  .win-open .choice{animation-delay:calc(.12s + var(--i,0) * .07s);}
+  /* la tarjeta de créditos entra con la ventana (#scene.win-open) y conserva su flotación propia */
+
+  /* aspecto de "ventana/panel de sistema": barra superior sutil que refuerza el marco.
+     Coherente con los tokens (ámbar + hairline). No altera la paleta ni la legibilidad. */
+  .choice::before,.analysis::before{box-sizing:border-box;}
+  .choice{overflow:hidden;}
+  .choice::after{content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--ambar), transparent 70%); opacity:.35; pointer-events:none; transition:opacity .25s var(--ease);}
+  .choice:hover::after,.choice:focus-visible::after{opacity:.8;}
+  .credits-card{overflow:hidden;}
+  .credits-card::after{content:''; position:absolute; top:0; left:0; right:0; height:4px;
+    background:linear-gradient(90deg, var(--ambar), var(--verde)); opacity:.5; pointer-events:none;}
+
   /* MINIJUEGO */
   #game{position:fixed; inset:0; z-index:120; display:none; align-items:center; justify-content:center; flex-direction:column; background:radial-gradient(120% 100% at 50% 30%, rgba(40,25,12,.6), rgba(8,6,4,.96)); backdrop-filter:blur(3px); padding:18px;}
   #game.on{display:flex;}
@@ -184,6 +228,9 @@
 
   @media (prefers-reduced-motion:reduce){
     #sand{display:none;} #bg{transform:none !important; transition:none;} .fade-in{animation:none;} .choice:hover{transform:none;}
+    /* Sin apertura tipo ventana con rebote: aparición simple y estable. */
+    #scene.win-open{animation:none !important; transform:none !important;}
+    .win-open .choice,.win-open .analysis{animation:none !important; transform:none !important; opacity:1 !important;}
     /* Lectura estática y legible: sin fade por scroll ni desplazamiento. */
     .body p{opacity:1 !important; transform:none !important; transition:none !important; will-change:auto;}
     .track-refugio #scene h2,.track-lyra #scene h2,.track-cronos #scene h2{animation:none !important;}
@@ -222,6 +269,8 @@
 
 <div id="ctrl" style="display:none;">
   <button id="c-sound" class="on" aria-pressed="true">♪ Sonido</button>
+  <button id="c-narrate" aria-pressed="false">🔊 Narrar</button>
+  <button id="c-credits" aria-pressed="false">✦ Créditos</button>
   <button id="c-full" aria-pressed="false">⛶ Pantalla</button>
 </div>
 <nav id="routes" style="display:none;" aria-label="Caminos"></nav>
@@ -384,6 +433,10 @@ var AUDIO=(function(){
     toggle:function(){ muted=!muted; if(muted){ids.forEach(function(k){if(els[k])fade(els[k],0,300);});} else if(cur){fade(els[cur],cur==='a-cota'?0.5:0.42,500);} return muted; },
     // fija el estado de silencio directamente (usado por "Entrar en silencio"); no requiere unlock previo
     mute:function(m){ muted=!!m; if(muted){ids.forEach(function(k){if(els[k])fade(els[k],0,200);});} else if(cur){fade(els[cur],cur==='a-cota'?0.5:0.42,500);} return muted; },
+    // ducking para el narrador: baja la pista actual mientras el TTS habla y la restaura al terminar.
+    // No toca el estado de silencio (muted) ni la pista activa (cur); solo ajusta el volumen de la pista en curso.
+    duck:function(){ if(muted||!cur||!els[cur])return; fade(els[cur],(cur==='a-cota'?0.5:0.42)*0.3,350); },
+    unduck:function(){ if(muted||!cur||!els[cur])return; fade(els[cur],cur==='a-cota'?0.5:0.42,700); },
     isMuted:function(){ return muted; } };
 })();
 
@@ -431,6 +484,154 @@ var WIND=(function(){
     duck:function(){ if(running&&!muted) ramp(baseVol*0.35,1400); },
     setMuted:function(m){ muted=!!m; if(!running)return; ramp(muted?0:baseVol,500); },
     isRunning:function(){ return running; }
+  };
+})();
+
+/* ====== NARRADOR (TTS, Web Speech API) ======
+   Lee en voz alta el cuerpo de la escena y, después, las opciones de decisión. Sin librerías ni
+   archivos: usa window.speechSynthesis + SpeechSynthesisUtterance. API: toggle(), speakScene(s),
+   stop(), isOn().
+   - Voz: elige una en español (lang empieza con 'es'); getVoices() suele llegar vacío hasta el
+     evento 'voiceschanged', así que lo escuchamos y reintentamos. rate 0.95, pitch 1.0 (tono de
+     narrador/podcast).
+   - Lectura natural: segmenta el texto por ORACIONES y encola una utterance por oración, de modo
+     que haya una pausa natural entre frases sin cortar a mitad de enunciado. Normaliza el texto
+     antes de leer (quita signos de adorno que suenan mal, conserva comas y puntos).
+   - Arranca por GESTO del usuario (botón en #ctrl). Al cambiar de escena, render() llama a
+     speakScene(): si está activo, cancela lo anterior y narra la nueva escena. Al desactivar,
+     cancel().
+   - Ducking: mientras habla, baja la música (AUDIO) y el viento (WIND) y los restaura al terminar. */
+var NARRATOR=(function(){
+  var synth=(typeof window!=='undefined' && window.speechSynthesis) ? window.speechSynthesis : null;
+  var on=false, voice=null, voiceReady=false, queue=[], speaking=false, lastScene=null, ducked=false;
+
+  function supported(){ return !!(synth && typeof window.SpeechSynthesisUtterance!=='undefined'); }
+
+  function pickVoice(){
+    if(!synth) return;
+    var voices=synth.getVoices()||[];
+    if(!voices.length){ return; }
+    voiceReady=true;
+    // preferimos español; dentro de español, una voz local/no remota y "natural" si la hay
+    var es=voices.filter(function(v){ return /^es/i.test(v.lang||''); });
+    function score(v){ var n=(v.name||'').toLowerCase(); var s=0;
+      if(v.localService) s+=1;
+      if(/natural|neural|google|microsoft|mónica|monica|helena|paulina|jorge|diego/.test(n)) s+=2;
+      return s; }
+    es.sort(function(a,b){ return score(b)-score(a); });
+    voice = es[0] || voices[0] || null;
+  }
+  if(synth){
+    pickVoice();
+    // getVoices() a menudo está vacío hasta 'voiceschanged'
+    if(typeof synth.addEventListener==='function'){ synth.addEventListener('voiceschanged', pickVoice); }
+    else { synth.onvoiceschanged = pickVoice; }
+  }
+
+  // NORMALIZACIÓN: quita/transforma caracteres de adorno que suenan mal en TTS; conserva comas y
+  // puntos (pausas). Reemplaza separadores por coma (pausa breve) y colapsa espacios.
+  function normalize(txt){
+    if(!txt) return '';
+    var t=String(txt);
+    t=t.replace(/[•·▸✦◀▶✕♪⛶✓]/g,' ');     // viñetas / iconos de interfaz
+    t=t.replace(/[_*#>|~^]/g,' ');            // marcas de formato
+    t=t.replace(/\s*[—–-]\s*/g,', ');         // guiones largos/medios → pausa de coma
+    t=t.replace(/:{2,}/g,', ').replace(/\.{3,}/g,', ');  // :: y … → pausa
+    t=t.replace(/[\[\]{}()"]/g,' ');          // corchetes/llaves/comillas rectas
+    t=t.replace(/\s{2,}/g,' ');               // espacios colapsados
+    t=t.replace(/\s+([,.;:!?])/g,'$1');       // sin espacio antes de puntuación
+    return t.trim();
+  }
+
+  // SEGMENTACIÓN por oraciones: corta tras . ! ? … (y cierres ? !) conservando el signo, para no
+  // trocear a mitad de frase. Devuelve enunciados completos listos para encolar.
+  function sentences(txt){
+    var n=normalize(txt);
+    if(!n) return [];
+    var parts=n.match(/[^.!?…]+[.!?…]+|[^.!?…]+$/g);
+    if(!parts) return [n];
+    return parts.map(function(p){ return p.trim(); }).filter(function(p){ return p.length>0; });
+  }
+
+  // Ducking solo sobre la música de pista (AUDIO). El viento (WIND) ya queda en segundo plano con
+  // su propio duck permanente al entrar; no lo tocamos para no deshacer ese ajuste.
+  function duck(){ if(ducked) return; ducked=true;
+    try{ if(AUDIO && AUDIO.duck) AUDIO.duck(); }catch(e){}
+  }
+  function unduck(){ if(!ducked) return; ducked=false;
+    try{ if(AUDIO && AUDIO.unduck) AUDIO.unduck(); }catch(e){}
+  }
+
+  function hardStop(){
+    speaking=false; queue=[];
+    if(synth){ try{ synth.cancel(); }catch(e){} }
+    unduck();
+  }
+
+  // encola y reproduce las frases en orden; la pausa entre utterances da el ritmo natural
+  function runQueue(){
+    if(!synth || !queue.length){ speaking=false; unduck(); return; }
+    speaking=true; duck();
+    var text=queue.shift();
+    var u=new window.SpeechSynthesisUtterance(text);
+    if(voice) u.voice=voice;
+    u.lang=(voice&&voice.lang)||'es-ES';
+    u.rate=0.95; u.pitch=1.0; u.volume=1.0;
+    u.onend=function(){ if(!on){ speaking=false; unduck(); return; } runQueue(); };
+    u.onerror=function(){ if(!on){ speaking=false; unduck(); return; } runQueue(); };
+    try{ synth.speak(u); }catch(e){ speaking=false; unduck(); }
+  }
+
+  // construye la cola a partir de la escena: cuerpo (texto) + opciones ("Opción uno: ...").
+  function build(scene){
+    var q=[];
+    if(scene){
+      if(scene.titulo){ q=q.concat(sentences(scene.titulo)); }
+      var body=[];
+      if(scene.texto && scene.texto.length){ body=scene.texto; }
+      else if(scene.lineas && scene.lineas.length){ body=scene.lineas.map(function(l){ return l.txt; }); }
+      body.forEach(function(par){ q=q.concat(sentences(par)); });
+      if(scene.nota){ q=q.concat(sentences(scene.nota)); }
+      if(scene.opc && scene.opc.length){
+        var ord=['una','dos','tres','cuatro','cinco','seis'];
+        q.push('Opciones.');
+        scene.opc.forEach(function(o,i){
+          q=q.concat(sentences('Opción '+(ord[i]||(i+1))+'. '+o.t));
+        });
+      }
+    }
+    return q.filter(Boolean);
+  }
+
+  function speakScene(scene){
+    lastScene=scene;
+    if(!on || !supported()) return;
+    // cancela la narración anterior antes de empezar la nueva escena
+    hardStop();
+    queue=build(scene);
+    if(!queue.length) return;
+    // algunos navegadores (Chrome) necesitan un pequeño respiro tras cancel() antes de speak()
+    setTimeout(function(){ if(on) runQueue(); }, 60);
+  }
+
+  function toggle(){
+    if(!supported()) return false;
+    on=!on;
+    if(on){
+      if(!voiceReady) pickVoice();           // reintento por si las voces llegaron tarde
+      if(lastScene) speakScene(lastScene);   // arranca narrando la escena actual
+    } else {
+      hardStop();
+    }
+    return on;
+  }
+
+  return {
+    toggle:toggle,
+    speakScene:speakScene,
+    stop:hardStop,
+    isOn:function(){ return on; },
+    supported:supported
   };
 })();
 
@@ -518,7 +719,8 @@ function renderCredits(s){
         '<div class="credits-actions">'+acciones+'</div>'+
       '</div>'+
     '</div>';
-  scene.classList.remove('fade-in'); void scene.offsetWidth; if(!reduced) scene.classList.add('fade-in');
+  // apertura tipo "ventana de SO": reinicia la animación quitando/forzando reflow/añadiendo la clase
+  scene.classList.remove('win-open'); void scene.offsetWidth; if(!reduced) scene.classList.add('win-open');
   // No hay párrafos de cuerpo en esta escena: la lectura por scroll queda inactiva.
   READ_PS=[];
   [].slice.call(scene.querySelectorAll('.credit-btn')).forEach(function(b){
@@ -527,6 +729,8 @@ function renderCredits(s){
   hud.innerHTML='<span class="here">'+TRACK_LABEL[s.track]+'</span><span class="sep">·</span><span>Historia central</span>';
   progress.style.width='100%';
   window.scrollTo(0,0);
+  // narra las líneas de créditos si el narrador está activo
+  NARRATOR.speakScene(s);
   refreshRoutes();
 }
 
@@ -554,10 +758,12 @@ function render(id, pushHist){
   if(s.reward){ resolved[s.track]=true; html+='<span class="reward">✦ '+s.reward+'</span>'; }
   if(s.nota){ html+='<div class="analysis'+(s.warn?' warn':'')+'" data-label="'+(s.mono?'ANÁLISIS':'LECTURA DEL ENLACE')+'" '+(s.warn?'style="border-left-color:var(--oxido);color:#e9b79a"':'')+'>'+s.nota+'</div>'; }
   html+='<div class="choices"><span class="lead">Elige el camino</span>';
-  s.opc.forEach(function(o,i){ html+='<button class="choice" data-go="'+o.d+'"><span class="n">0'+(i+1)+'</span>'+o.t+'</button>'; });
+  // --i: índice para escalonar (stagger) la apertura tipo ventana de cada opción
+  s.opc.forEach(function(o,i){ html+='<button class="choice" data-go="'+o.d+'" style="--i:'+i+'"><span class="n">0'+(i+1)+'</span>'+o.t+'</button>'; });
   html+='</div>';
   scene.innerHTML=html;
-  scene.classList.remove('fade-in'); void scene.offsetWidth; if(!reduced) scene.classList.add('fade-in');
+  // apertura tipo "ventana de SO": reinicia la animación (reflow) y la aplica al contenedor de la escena
+  scene.classList.remove('win-open'); void scene.offsetWidth; if(!reduced) scene.classList.add('win-open');
   // lectura acoplada al scroll: recoge los párrafos del cuerpo narrativo de esta escena
   collectParagraphs();
   // listeners de elección
@@ -571,6 +777,8 @@ function render(id, pushHist){
   // recalcula el foco de lectura inmediatamente tras pintar y reposicionar el scroll, para que
   // los párrafos ya en la zona de foco se muestren plenos y ninguno quede atascado atenuado.
   updateReadingFocus();
+  // narra la escena actual (cuerpo + opciones) si el narrador está activo; cancela la anterior
+  NARRATOR.speakScene(s);
   refreshRoutes();
 }
 function transitionTo(id){
@@ -639,6 +847,19 @@ cSound.addEventListener('click',function(){
   reflectSound();
 });
 document.getElementById('c-full').addEventListener('click',function(){ if(!document.fullscreenElement){ if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen(); this.classList.add('on'); } else { if(document.exitFullscreen)document.exitFullscreen(); this.classList.remove('on'); } });
+
+// Narrador (TTS): el botón es el GESTO que lo activa. Refleja estado (aria-pressed + texto + clase).
+var cNarrate=document.getElementById('c-narrate');
+if(!NARRATOR.supported()){ cNarrate.disabled=true; cNarrate.style.opacity='.5'; cNarrate.title='Narración no disponible en este navegador'; }
+cNarrate.addEventListener('click',function(){
+  var active=NARRATOR.toggle();
+  cNarrate.classList.toggle('on',active);
+  cNarrate.setAttribute('aria-pressed',String(active));
+  cNarrate.textContent=active?'⏸ Narración':'🔊 Narrar';
+});
+
+// Acceso permanente a los créditos desde cualquier punto de la experiencia.
+document.getElementById('c-credits').addEventListener('click',function(){ transitionTo('creditos'); });
 
 /* ====== MINIJUEGO: GUARDIÁN DEL ACUÍFERO ====== */
 var GAME=(function(){
