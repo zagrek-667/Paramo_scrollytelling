@@ -23,9 +23,12 @@
   /* atmósfera de arena */
   #sand{position:fixed; inset:0; width:100vw; height:100vh; z-index:2; pointer-events:none; opacity:.55;}
 
-  /* ENTRADA */
+  /* ENTRADA
+     Fondo transparente con solo el degradado radial de acento: el lienzo de arena (#sand, z-index 2)
+     queda por detrás del contenido de la entrada (z-index 100) pero por encima del --noche del body,
+     de modo que la textura de arena se percibe desde el arranque sin tapar el texto. */
   #entry{position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; text-align:center; padding:24px;
-    background:radial-gradient(120% 90% at 50% 20%, rgba(156,74,42,.14), transparent 55%), var(--noche); transition:opacity 1s var(--ease);}
+    background:radial-gradient(120% 90% at 50% 20%, rgba(156,74,42,.14), transparent 55%); transition:opacity 1s var(--ease);}
   #entry.gone{opacity:0; pointer-events:none;}
   #entry .eyebrow{font-family:'VT323',monospace; font-size:clamp(1rem,2.2vw,1.3rem); letter-spacing:.35em; color:var(--ambar); text-transform:uppercase;}
   #entry h1{font-size:var(--fs-display); line-height:.92; margin:0; color:var(--hueso);}
@@ -33,6 +36,11 @@
   #entry .sub{max-width:520px; color:var(--arena); font-size:var(--fs-body); line-height:1.6; margin:0 auto;}
   #btn-start{font-family:'VT323',monospace; font-size:clamp(1.1rem,2.4vw,1.6rem); letter-spacing:.2em; color:var(--noche); background:var(--ambar); border:none; padding:15px 42px; border-radius:3px; cursor:pointer; text-transform:uppercase; transition:all .3s var(--ease); box-shadow:0 0 28px rgba(201,135,47,.35);}
   #btn-start:hover{background:var(--hueso); box-shadow:0 0 46px rgba(201,135,47,.6); transform:translateY(-2px);}
+  #btn-start:disabled,#btn-start.loading{cursor:progress; background:var(--arena); color:var(--noche); box-shadow:0 0 20px rgba(201,135,47,.22); transform:none;}
+  #btn-start.loading{display:inline-flex; align-items:center; gap:11px; justify-content:center;}
+  #btn-start .spin{display:inline-block; width:14px; height:14px; border:2px solid rgba(20,17,12,.35); border-top-color:var(--noche); border-radius:50%; animation:btnspin .7s linear infinite;}
+  @keyframes btnspin{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion:reduce){ #btn-start .spin{animation:none;} }
   #entry .note{display:flex; align-items:center; gap:9px; color:var(--muted); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; font-family:'VT323',monospace;}
   #entry .note svg{width:24px; height:24px; stroke:var(--muted); fill:none; stroke-width:1.6;}
 
@@ -353,10 +361,33 @@ function refreshRoutes(){
 }
 
 /* ====== FLUJO DE ENTRADA ====== */
-var entry=document.getElementById('entry'), vwrap=document.getElementById('vwrap'), vid=document.getElementById('vid'), skip=document.getElementById('skip'), started=false, entered=false;
-document.getElementById('btn-start').addEventListener('click',function(){ if(started)return; started=true; AUDIO.unlock(); entry.classList.add('gone'); vwrap.classList.add('on'); vid.muted=false; vid.currentTime=0; var pr=vid.play(); if(pr&&pr.catch)pr.catch(enter); setTimeout(function(){entry.style.display='none';},1000); });
-vid.addEventListener('ended',enter); vid.addEventListener('error',enter); skip.addEventListener('click',enter);
-function enter(){ if(entered)return; entered=true; try{vid.pause();}catch(e){} vwrap.style.transition='opacity .6s ease'; vwrap.style.opacity='0'; setTimeout(function(){vwrap.style.display='none';},600);
+// La atmósfera de arena arranca desde la pantalla de entrada (coherente con el resto de la experiencia).
+// SAND.start() se autoinhibe con prefers-reduced-motion y es idempotente, así que repetirlo en enter() es seguro.
+SAND.start();
+var entry=document.getElementById('entry'), vwrap=document.getElementById('vwrap'), vid=document.getElementById('vid'), skip=document.getElementById('skip'),
+    btnStart=document.getElementById('btn-start'), started=false, entered=false, playing=false, loadTO=null;
+
+// Arranca la reproducción del video de intro una vez que hay datos suficientes (o tras el fallback de timeout).
+function beginPlayback(){ if(playing||entered)return; playing=true; if(loadTO){clearTimeout(loadTO); loadTO=null;}
+  vid.removeEventListener('canplaythrough',beginPlayback); vid.removeEventListener('canplay',beginPlayback);
+  entry.classList.add('gone'); vwrap.classList.add('on'); vid.muted=false; try{vid.currentTime=0;}catch(e){}
+  var pr=vid.play(); if(pr&&pr.catch)pr.catch(enter); setTimeout(function(){entry.style.display='none';},1000); }
+
+btnStart.addEventListener('click',function(){ if(started)return; started=true;
+  // El desbloqueo de audio debe ocurrir dentro del gesto del usuario (requisito en móvil): no lo muevas.
+  AUDIO.unlock();
+  // Estado de carga: feedback mientras Intro.mp4 (~8.6 MB) precarga, para que no parezca que la experiencia se rompió.
+  btnStart.disabled=true; btnStart.classList.add('loading'); btnStart.innerHTML='<span class="spin" aria-hidden="true"></span>Cargando…'; btnStart.setAttribute('aria-busy','true');
+  try{vid.preload='auto'; vid.load();}catch(e){}
+  if(vid.readyState>=3){ beginPlayback(); return; }
+  vid.addEventListener('canplaythrough',beginPlayback); vid.addEventListener('canplay',beginPlayback);
+  // Fallback: si el evento no dispara (red lenta, navegador que no precarga), arranca igual tras 8 s para no dejar al usuario atascado.
+  loadTO=setTimeout(beginPlayback,8000);
+});
+vid.addEventListener('ended',enter); vid.addEventListener('error',function(){ if(loadTO){clearTimeout(loadTO); loadTO=null;} enter(); }); skip.addEventListener('click',enter);
+function enter(){ if(entered)return; entered=true; if(loadTO){clearTimeout(loadTO); loadTO=null;}
+  vid.removeEventListener('canplaythrough',beginPlayback); vid.removeEventListener('canplay',beginPlayback);
+  try{vid.pause();}catch(e){} vwrap.style.transition='opacity .6s ease'; vwrap.style.opacity='0'; setTimeout(function(){vwrap.style.display='none';},600);
   SAND.start(); AUDIO.curSet(null); AUDIO.set('a-hub'); hud.style.display='flex'; ctrl.style.display='flex'; routes.style.display='flex'; render('llegada_paramo'); }
 
 /* ====== CONTROLES ====== */
