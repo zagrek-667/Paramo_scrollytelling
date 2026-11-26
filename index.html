@@ -297,9 +297,11 @@
   /* MINIJUEGO */
   #game{position:fixed; inset:0; z-index:120; display:none; align-items:center; justify-content:center; flex-direction:column; background:radial-gradient(120% 100% at 50% 30%, rgba(40,25,12,.6), rgba(8,6,4,.96)); backdrop-filter:blur(3px); padding:18px;}
   #game.on{display:flex;}
-  .gframe{position:relative; width:min(660px,94vw); border:1px solid var(--hair-s); border-radius:12px; background:#0c0a07; box-shadow:inset 0 0 36px rgba(0,0,0,.8), 0 0 36px rgba(201,135,47,.12); padding:14px;}
-  #gcv{display:block; width:100%; height:auto; border-radius:7px; background:#0a0806;}
-  .ghud{display:flex; justify-content:space-between; font-family:'VT323',monospace; letter-spacing:.12em; color:var(--ambar); font-size:1.05rem; margin-bottom:8px; text-transform:uppercase;}
+  .gframe{position:relative; width:min(660px,94vw); border:1px solid rgba(201,135,47,.35); border-radius:14px; background:linear-gradient(180deg,#0e0b07,#0a0806); box-shadow:inset 0 0 40px rgba(0,0,0,.85), 0 0 0 1px rgba(0,0,0,.4), 0 18px 48px rgba(0,0,0,.55), 0 0 40px rgba(201,135,47,.14); padding:16px;}
+  .gframe::before{content:""; position:absolute; top:7px; left:12px; width:46px; height:4px; border-radius:3px; background:rgba(201,135,47,.4); box-shadow:10px 0 0 rgba(107,122,82,.35), 20px 0 0 rgba(156,74,42,.35);}
+  #gcv{display:block; width:100%; height:auto; border-radius:9px; background:#0a0806; border:1px solid rgba(0,0,0,.6); box-shadow:inset 0 0 24px rgba(0,0,0,.7);}
+  .ghud{display:flex; justify-content:space-between; gap:8px; align-items:center; font-family:'Share Tech Mono',monospace; letter-spacing:.1em; color:var(--ambar); font-size:.92rem; margin:4px 2px 10px; text-transform:uppercase;}
+  .ghud span span{color:var(--hueso); font-weight:600;}
   .ghud .mid{color:var(--verde);}
   #gexit{position:absolute; top:-13px; right:-9px; z-index:2; font-family:'VT323',monospace; background:var(--oxido); color:var(--hueso); border:none; border-radius:4px; padding:7px 13px; cursor:pointer; letter-spacing:.1em;}
   .gtouch{display:none; justify-content:space-between; gap:12px; margin-top:12px;}
@@ -1013,32 +1015,203 @@ var GAME=(function(){
   var ov=document.getElementById('game'),cv=document.getElementById('gcv'),cx=cv.getContext('2d');
   var sE=document.getElementById('g-score'),cE=document.getElementById('g-combo'),mE=document.getElementById('g-meter');
   var W=cv.width,H=cv.height,raf=null,running=false,state='idle',last=0;
-  var paddle,drops,parts,score,combo,maxc,meter,spawnT,every,fall,level,left,right;
-  function reset(){paddle={x:W/2,w:92,h:15,y:H-32};drops=[];parts=[];score=0;combo=0;maxc=0;meter=5;spawnT=0;every=0.9;fall=120;level=1;left=right=false;sync();}
+  var paddle,drops,parts,floats,score,combo,maxc,meter,spawnT,every,fall,level,left,right;
+  var shake=0,flash=0,aqDisp=5,dust=[],sky=null,bruma=0,TYC={clean:'#7fd0b0',acid:'#b5612f',golden:'#e8c86a',filter:'#6b7a52'};
+  function reset(){paddle={x:W/2,w:92,h:15,y:H-32};drops=[];parts=[];floats=[];score=0;combo=0;maxc=0;meter=5;spawnT=0;every=0.9;fall=120;level=1;left=right=false;shake=0;flash=0;aqDisp=5;initDust();sky=null;sync();}
   function sync(){sE.textContent=score;cE.textContent=combo;mE.textContent=Math.max(0,meter);}
   function mult(){return combo>=18?4:combo>=10?3:combo>=5?2:1;}
   function spawn(){var r=Math.random(),t=r<0.04?'golden':r<0.08?'filter':r<0.34?'acid':'clean';drops.push({x:30+Math.random()*(W-60),y:-16,r:11,vy:fall+Math.random()*40+score*0.8,t:t});}
   function pt(x,y,c){for(var i=0;i<7;i++)parts.push({x:x,y:y,vx:(Math.random()*2-1)*2,vy:(Math.random()*-2-0.5)*2,life:1,c:c});}
   function beep(f,d,ty){try{if(!window._ac)window._ac=new (window.AudioContext||window.webkitAudioContext)();var ac=window._ac,o=ac.createOscillator(),g=ac.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(0.0001,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.12,ac.currentTime+0.01);g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d+0.02);}catch(e){}}
   function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath();}
-  function idle(){cx.fillStyle='#120d08';cx.fillRect(0,0,W,H);cx.textAlign='center';cx.fillStyle='#c9872f';cx.font="38px 'VT323',monospace";cx.fillText('GUARDIÁN DEL ACUÍFERO',W/2,84);cx.font="17px 'VT323',monospace";cx.fillStyle='#e8dcc8';cx.fillText('◀ ▶ mover · Espacio para iniciar',W/2,H-58);cx.textAlign='left';var ly=140,lx=W/2-130;[['#7fd0b0','Limpia  +agua'],['#b5612f','Ácida  drena'],['#e8c86a','Dorada  +5 ×combo'],['#6b7a52','Filtro  escudo / +1']].forEach(function(it){cx.fillStyle=it[0];cx.beginPath();cx.arc(lx,ly-5,8,0,6.283);cx.fill();cx.fillStyle='#e8dcc8';cx.font="16px 'VT323',monospace";cx.fillText(it[1],lx+22,ly);ly+=32;});cx.textAlign='center';cx.fillStyle='#c9872f';cx.font="22px 'VT323',monospace";cx.fillText('▶ PULSA ESPACIO',W/2,H-100);}
-  function over(){running=false;if(raf)cancelAnimationFrame(raf);raf=null;cx.fillStyle='rgba(10,8,5,.84)';cx.fillRect(0,0,W,H);cx.textAlign='center';cx.fillStyle='#c9872f';cx.font="32px 'VT323',monospace";cx.fillText(score>=20?'EL ACUÍFERO RESISTE':'EL PÁRAMO SE SECA…',W/2,H/2-28);cx.fillStyle='#e8dcc8';cx.font="19px 'VT323',monospace";cx.fillText('Agua: '+score+' · Combo máx: '+maxc+' · Nivel: '+level,W/2,H/2+6);cx.fillStyle='#9a886a';cx.fillText('Espacio / toque para reintentar',W/2,H/2+38);}
+  /* ---- Helpers de dibujo (solo estética; no tocan física/colisiones) ---- */
+  function float(x,y,txt,c){floats.push({x:x,y:y,t:txt,c:c,life:1});}
+  function initDust(){dust=[];var n=reduced?10:22;for(var i=0;i<n;i++)dust.push({x:Math.random()*W,y:Math.random()*H,r:0.5+Math.random()*1.4,vx:4+Math.random()*10,a:0.04+Math.random()*0.1});}
+  function lerpHex(h,amt,light){ // aclara(+)/oscurece(-) un color hex sencillo
+    var n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255,f=light?255:0;
+    r=Math.round(r+(f-r)*amt);g=Math.round(g+(f-g)*amt);b=Math.round(b+(f-b)*amt);
+    return 'rgb('+r+','+g+','+b+')';}
+  // Trazado de una gota (teardrop): cuerpo circular con punta superior.
+  function teardropPath(x,y,r){cx.beginPath();cx.moveTo(x,y-r*1.55);cx.bezierCurveTo(x+r*0.9,y-r*0.7,x+r,y-r*0.1,x+r,y+r*0.1);cx.arc(x,y+r*0.15,r,-0.32,Math.PI+0.32,false);cx.bezierCurveTo(x-r,y-r*0.1,x-r*0.9,y-r*0.7,x,y-r*1.55);cx.closePath();}
+  // Dibuja una gota con volumen pseudo-3D (gradiente radial + highlight + halo + icono por tipo).
+  function drawDrop(x,y,r,t){
+    var base=TYC[t];
+    cx.save();
+    // halo/sombra sutil del color del tipo
+    cx.shadowColor=base;cx.shadowBlur=reduced?6:12;
+    teardropPath(x,y,r);
+    var g=cx.createRadialGradient(x-r*0.38,y-r*0.45,r*0.15,x,y+r*0.15,r*1.35);
+    g.addColorStop(0,lerpHex(base,0.55,true));
+    g.addColorStop(0.5,base);
+    g.addColorStop(1,lerpHex(base,0.45,false));
+    cx.fillStyle=g;cx.fill();
+    cx.shadowBlur=0;
+    // borde interior oscuro para redondez
+    cx.lineWidth=1;cx.strokeStyle=lerpHex(base,0.35,false);cx.stroke();
+    // highlight especular desplazado hacia la fuente de luz (arriba-izquierda)
+    cx.beginPath();cx.ellipse(x-r*0.34,y-r*0.42,r*0.3,r*0.44,-0.5,0,6.283);
+    cx.fillStyle='rgba(255,255,255,'+(reduced?0.3:0.45)+')';cx.fill();
+    // icono interno por tipo
+    drawDropIcon(x,y,r,t,base);
+    cx.restore();
+  }
+  function drawDropIcon(x,y,r,t,base){
+    cx.save();cx.translate(x,y+r*0.1);
+    if(t==='golden'){ // estrella/brillo dorado
+      cx.strokeStyle='rgba(255,250,220,.9)';cx.lineWidth=1.4;cx.beginPath();
+      cx.moveTo(0,-r*0.6);cx.lineTo(0,r*0.6);cx.moveTo(-r*0.6,0);cx.lineTo(r*0.6,0);
+      cx.moveTo(-r*0.4,-r*0.4);cx.lineTo(r*0.4,r*0.4);cx.moveTo(r*0.4,-r*0.4);cx.lineTo(-r*0.4,r*0.4);cx.stroke();
+    } else if(t==='acid'){ // burbujas corrosivas
+      cx.fillStyle='rgba(30,16,8,.5)';
+      cx.beginPath();cx.arc(-r*0.25,-r*0.1,r*0.26,0,6.283);cx.fill();
+      cx.beginPath();cx.arc(r*0.28,r*0.18,r*0.18,0,6.283);cx.fill();
+      cx.beginPath();cx.arc(r*0.05,r*0.42,r*0.12,0,6.283);cx.fill();
+    } else if(t==='filter'){ // glifo de escudo/filtro
+      cx.strokeStyle='rgba(234,220,200,.92)';cx.lineWidth=1.3;cx.beginPath();
+      cx.moveTo(0,-r*0.62);cx.lineTo(r*0.5,-r*0.32);cx.lineTo(r*0.5,r*0.18);cx.lineTo(0,r*0.6);
+      cx.lineTo(-r*0.5,r*0.18);cx.lineTo(-r*0.5,-r*0.32);cx.closePath();cx.stroke();
+      cx.beginPath();cx.moveTo(-r*0.22,0);cx.lineTo(-r*0.03,r*0.24);cx.lineTo(r*0.26,-r*0.22);cx.stroke();
+    } else { // clean: ondas de agua
+      cx.strokeStyle='rgba(255,255,255,.55)';cx.lineWidth=1.2;
+      cx.beginPath();cx.arc(0,r*0.08,r*0.42,0.2,Math.PI-0.2);cx.stroke();
+      cx.beginPath();cx.arc(0,-r*0.18,r*0.28,0.3,Math.PI-0.3);cx.stroke();
+    }
+    cx.restore();
+  }
+  // Colector/cisterna metálica curva con volumen (mismo ancho/alto de colisión que paddle).
+  function drawCollector(px,py,w,h){
+    var x=px-w/2,hasShield=meter>=5;
+    cx.save();
+    // sombra proyectada
+    cx.fillStyle='rgba(0,0,0,.35)';cx.beginPath();cx.ellipse(px,py+h+4,w*0.5,5,0,0,6.283);cx.fill();
+    // cuerpo cilíndrico metálico
+    rr(x,py,w,h+4,6);
+    var body=cx.createLinearGradient(0,py,0,py+h+4);
+    body.addColorStop(0,'#e7b668');body.addColorStop(0.18,'#c9872f');body.addColorStop(0.55,'#8f5a22');body.addColorStop(1,'#5e3a16');
+    cx.fillStyle=body;cx.fill();
+    // reborde superior iluminado
+    cx.lineWidth=2;cx.strokeStyle='rgba(255,230,180,.75)';cx.beginPath();cx.moveTo(x+4,py+1);cx.lineTo(x+w-4,py+1);cx.stroke();
+    // lámina de agua recogida que brilla dentro
+    cx.save();rr(x+5,py+3,w-10,h-5,4);cx.clip();
+    var wat=cx.createLinearGradient(0,py+3,0,py+h);
+    wat.addColorStop(0,'rgba(127,208,176,.85)');wat.addColorStop(1,'rgba(60,120,110,.6)');
+    cx.fillStyle=wat;cx.fillRect(x+5,py+5,w-10,h);
+    cx.fillStyle='rgba(255,255,255,.4)';cx.fillRect(x+7,py+5,w-14,1.5);
+    cx.restore();
+    // reflejo lateral
+    cx.fillStyle='rgba(255,255,255,.14)';cx.fillRect(x+6,py+2,w*0.3,2);
+    if(hasShield){cx.strokeStyle='rgba(107,122,82,.8)';cx.lineWidth=2;rr(x-3,py-3,w+6,h+10,8);cx.stroke();}
+    cx.restore();
+  }
+  // Depósito/tanque lateral que indica el nivel de acuífero (0..5).
+  function drawTank(){
+    var tw=16,th=96,tx=W-tw-12,ty=24,frac=Math.max(0,Math.min(1,aqDisp/5));
+    cx.save();
+    cx.fillStyle='rgba(12,9,6,.6)';rr(tx,ty,tw,th,5);cx.fill();
+    cx.lineWidth=1.3;cx.strokeStyle='rgba(201,135,47,.7)';cx.stroke();
+    var fh=(th-6)*frac,fy=ty+3+(th-6-fh);
+    cx.save();rr(tx+2,ty+2,tw-4,th-4,4);cx.clip();
+    var col=frac>0.5?'#7fd0b0':frac>0.25?'#e8c86a':'#b5612f';
+    var g=cx.createLinearGradient(0,fy,0,ty+th);g.addColorStop(0,lerpHex(col,0.25,true));g.addColorStop(1,lerpHex(col,0.25,false));
+    cx.fillStyle=g;cx.fillRect(tx+2,fy,tw-4,fh+4);
+    cx.fillStyle='rgba(255,255,255,.35)';cx.fillRect(tx+3,fy,tw-6,1.5);
+    cx.restore();
+    cx.fillStyle='#9a886a';cx.font="11px 'Share Tech Mono',monospace";cx.textAlign='center';cx.fillText('ACU',tx+tw/2,ty-6);
+    cx.restore();
+  }
+  // Fondo por capas: cielo de ceniza (cacheado), cordillera lejana y bruma seca. Sin lluvia.
+  function drawBackground(dt){
+    if(!sky){sky=cx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#17120c');sky.addColorStop(0.42,'#241910');sky.addColorStop(0.72,'#39230f');sky.addColorStop(1,'#2a1a0e');}
+    cx.fillStyle=sky;cx.fillRect(0,0,W,H);
+    // sol/halo ámbar tenue del futuro cercano seco
+    var sun=cx.createRadialGradient(W*0.74,H*0.3,8,W*0.74,H*0.3,160);
+    sun.addColorStop(0,'rgba(201,135,47,.28)');sun.addColorStop(1,'rgba(201,135,47,0)');
+    cx.fillStyle=sun;cx.fillRect(0,0,W,H);
+    // cordillera/estructuras lejanas (capa de profundidad)
+    cx.fillStyle='rgba(60,42,26,.55)';cx.beginPath();cx.moveTo(0,H*0.58);
+    for(var mx=0;mx<=W;mx+=48)cx.lineTo(mx,H*0.58-Math.sin(mx*0.015+1)*26-14);
+    cx.lineTo(W,H);cx.lineTo(0,H);cx.fill();
+    // ladera cercana verdosa reseca
+    cx.fillStyle='rgba(107,122,82,.22)';cx.beginPath();cx.moveTo(0,H*0.74);
+    for(var nx=0;nx<=W;nx+=40)cx.lineTo(nx,H*0.74-Math.sin(nx*0.02)*16-8);
+    cx.lineTo(W,H);cx.lineTo(0,H);cx.fill();
+    // bruma/polvo suspendido
+    bruma=(bruma+dt*0.3)%1;
+    var hz=cx.createLinearGradient(0,H*0.55,0,H);hz.addColorStop(0,'rgba(201,169,120,0)');hz.addColorStop(1,'rgba(201,169,120,.07)');
+    cx.fillStyle=hz;cx.fillRect(0,H*0.55,W,H*0.45);
+    // partículas de polvo (ligeras, se reciclan)
+    for(var i=0;i<dust.length;i++){var p=dust[i];p.x+=p.vx*dt;if(p.x>W+4){p.x=-4;p.y=Math.random()*H;}cx.globalAlpha=p.a;cx.fillStyle='#d8c29a';cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.283);cx.fill();}
+    cx.globalAlpha=1;
+  }
+  function idle(){
+    drawBackground(0);
+    cx.save();cx.fillStyle='rgba(8,6,4,.55)';cx.fillRect(0,0,W,H);cx.restore();
+    cx.textAlign='center';
+    cx.fillStyle='#9a886a';cx.font="13px 'Share Tech Mono',monospace";cx.fillText('GUARDIÁN DEL ACUÍFERO',W/2,44);
+    cx.fillStyle='#e8dcc8';cx.font="46px 'Anton',sans-serif";cx.fillText('LA ÚLTIMA GOTA',W/2,92);
+    // frase de SENTIDO (cierre de la experiencia, cuidado del agua)
+    cx.fillStyle='#c9a978';cx.font="italic 16px 'Spectral',serif";
+    cx.fillText('Lo que recojas hoy será el páramo de mañana.',W/2,122);
+    // leyenda con las gotas elaboradas como muestra
+    cx.textAlign='left';var ly=168,lx=W/2-138;
+    [['clean','Limpia · suma agua'],['golden','Dorada · +5 y multiplica'],['acid','Ácida · drena el acuífero'],['filter','Filtro · escudo / +1']].forEach(function(it){
+      drawDrop(lx,ly-5,11,it[0]);
+      cx.fillStyle='#e8dcc8';cx.font="16px 'Share Tech Mono',monospace";cx.textAlign='left';cx.fillText(it[1],lx+26,ly);
+      ly+=42;
+    });
+    cx.textAlign='center';
+    cx.fillStyle='#c9872f';cx.font="24px 'Oswald',sans-serif";cx.fillText('▶  PULSA ESPACIO',W/2,H-56);
+    cx.fillStyle='#9a886a';cx.font="14px 'Share Tech Mono',monospace";cx.fillText('◀ ▶ mover  ·  toca para empezar',W/2,H-30);
+    cx.textAlign='left';
+  }
+  function over(){running=false;if(raf)cancelAnimationFrame(raf);raf=null;
+    var win=score>=20;
+    cx.fillStyle='rgba(8,6,4,.9)';cx.fillRect(0,0,W,H);
+    cx.textAlign='center';
+    cx.fillStyle='#9a886a';cx.font="13px 'Share Tech Mono',monospace";cx.fillText('FIN DE LA TRAVESÍA',W/2,H/2-96);
+    cx.fillStyle=win?'#7fd0b0':'#b5612f';cx.font="40px 'Anton',sans-serif";
+    cx.fillText(win?'EL ACUÍFERO RESISTE':'EL PÁRAMO SE SECA',W/2,H/2-50);
+    // resumen con jerarquía
+    cx.fillStyle='#e8dcc8';cx.font="22px 'Oswald',sans-serif";
+    cx.fillText('Agua recogida: '+score,W/2,H/2-6);
+    cx.fillStyle='#c9a978';cx.font="16px 'Share Tech Mono',monospace";
+    cx.fillText('Combo máx '+maxc+'   ·   Nivel '+level,W/2,H/2+24);
+    // lectura final (sentido)
+    cx.fillStyle='#9a886a';cx.font="italic 15px 'Spectral',serif";
+    cx.fillText(win?'Cuidaste la última reserva. El páramo sigue respirando.':'El agua se escapó entre las manos. Queda intentarlo de nuevo.',W/2,H/2+58);
+    cx.fillStyle='#c9872f';cx.font="18px 'Oswald',sans-serif";
+    cx.fillText('Espacio / toque para reintentar',W/2,H/2+96);
+    cx.textAlign='left';
+  }
   function start(){reset();state='play';running=true;if(raf)cancelAnimationFrame(raf);last=performance.now();loop();}
   function loop(){raf=requestAnimationFrame(loop);var now=performance.now(),dt=Math.min(0.05,(now-last)/1000);last=now;
     if(left)paddle.x-=360*dt;if(right)paddle.x+=360*dt;paddle.x=Math.max(paddle.w/2,Math.min(W-paddle.w/2,paddle.x));
     spawnT+=dt;if(spawnT>=every){spawnT=0;spawn();}
-    var g=cx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1a130c');g.addColorStop(1,'#2a1a0e');cx.fillStyle=g;cx.fillRect(0,0,W,H);
-    cx.fillStyle='rgba(107,122,82,.25)';cx.beginPath();cx.moveTo(0,H*0.72);for(var mx=0;mx<=W;mx+=40)cx.lineTo(mx,H*0.72-Math.sin(mx*0.02)*16-8);cx.lineTo(W,H);cx.lineTo(0,H);cx.fill();
-    for(var i=drops.length-1;i>=0;i--){var d=drops[i];d.y+=d.vy*dt;cx.beginPath();cx.arc(d.x,d.y,d.r,0,6.283);cx.fillStyle=d.t==='acid'?'#b5612f':d.t==='golden'?'#e8c86a':d.t==='filter'?'#6b7a52':'#7fd0b0';cx.shadowColor=cx.fillStyle;cx.shadowBlur=8;cx.fill();cx.shadowBlur=0;
+    // --- CAPA DE DIBUJO: fondo + screen-shake sutil (decae). No afecta a la física. ---
+    drawBackground(dt);
+    cx.save();
+    if(shake>0.01&&!reduced){cx.translate((Math.random()*2-1)*shake,(Math.random()*2-1)*shake);}
+    shake*=0.86;
+    for(var i=drops.length-1;i>=0;i--){var d=drops[i];d.y+=d.vy*dt;drawDrop(d.x,d.y,d.r,d.t);
       if(d.y>paddle.y-6&&d.y<paddle.y+paddle.h+6&&Math.abs(d.x-paddle.x)<paddle.w/2+d.r){drops.splice(i,1);
-        if(d.t==='acid'){meter--;combo=0;pt(d.x,d.y,'#9c4a2a');beep(140,0.08,'sawtooth');}
-        else if(d.t==='filter'){if(meter<5)meter++;pt(d.x,d.y,'#6b7a52');beep(520,0.1,'triangle');}
-        else{var p=(d.t==='golden'?5:1)*mult();score+=p;combo++;if(combo>maxc)maxc=combo;pt(d.x,d.y,d.t==='golden'?'#e8c86a':'#7fd0b0');beep(d.t==='golden'?880:660,0.08,'sine');if(score>0&&score%12===0){level++;every=Math.max(0.42,every-0.07);fall+=14;beep(990,0.12,'triangle');}}
-        sync();if(meter<=0){over();return;}}
-      else if(d.y>H+20){drops.splice(i,1);if(d.t==='clean'||d.t==='golden'){meter--;combo=0;sync();if(meter<=0){over();return;}}}}
-    cx.fillStyle='#c9872f';rr(paddle.x-paddle.w/2,paddle.y,paddle.w,paddle.h,4);cx.fill();
-    for(var j=parts.length-1;j>=0;j--){var q=parts[j];q.x+=q.vx;q.y+=q.vy;q.vy+=0.15;q.life-=dt*2;if(q.life<=0){parts.splice(j,1);continue;}cx.globalAlpha=Math.max(0,q.life);cx.fillStyle=q.c;cx.fillRect(q.x,q.y,3,3);cx.globalAlpha=1;}
-    if(mult()>1){cx.fillStyle='#e8c86a';cx.font="18px 'VT323',monospace";cx.textAlign='left';cx.fillText('x'+mult(),12,24);}}
+        if(d.t==='acid'){meter--;combo=0;pt(d.x,d.y,'#9c4a2a');beep(140,0.08,'sawtooth');float(d.x,paddle.y-12,'ácida',TYC.acid);flash=1;if(!reduced)shake=6;}
+        else if(d.t==='filter'){if(meter<5)meter++;pt(d.x,d.y,'#6b7a52');beep(520,0.1,'triangle');float(d.x,paddle.y-12,'escudo',TYC.filter);}
+        else{var p=(d.t==='golden'?5:1)*mult();score+=p;combo++;if(combo>maxc)maxc=combo;pt(d.x,d.y,d.t==='golden'?'#e8c86a':'#7fd0b0');beep(d.t==='golden'?880:660,0.08,'sine');float(d.x,paddle.y-12,(mult()>1?'x'+mult()+' ':'')+'+'+p,d.t==='golden'?TYC.golden:TYC.clean);if(score>0&&score%12===0){level++;every=Math.max(0.42,every-0.07);fall+=14;beep(990,0.12,'triangle');float(W/2,H*0.4,'NIVEL '+level,'#c9872f');}}
+        sync();if(meter<=0){cx.restore();over();return;}}
+      else if(d.y>H+20){drops.splice(i,1);if(d.t==='clean'||d.t==='golden'){meter--;combo=0;sync();if(meter<=0){cx.restore();over();return;}}}}
+    drawCollector(paddle.x,paddle.y,paddle.w,paddle.h);
+    // salpicaduras/partículas (misma física que antes, dibujo con alpha)
+    for(var j=parts.length-1;j>=0;j--){var q=parts[j];q.x+=q.vx;q.y+=q.vy;q.vy+=0.15;q.life-=dt*2;if(q.life<=0){parts.splice(j,1);continue;}cx.globalAlpha=Math.max(0,q.life);cx.fillStyle=q.c;cx.beginPath();cx.arc(q.x,q.y,1.8,0,6.283);cx.fill();cx.globalAlpha=1;}
+    // textos flotantes (suben y se desvanecen; se limpian al morir)
+    for(var k=floats.length-1;k>=0;k--){var f=floats[k];f.y-=24*dt;f.life-=dt*1.2;if(f.life<=0){floats.splice(k,1);continue;}cx.globalAlpha=Math.max(0,f.life);cx.fillStyle=f.c;cx.font="bold 16px 'Oswald',sans-serif";cx.textAlign='center';cx.fillText(f.t,f.x,f.y);cx.globalAlpha=1;cx.textAlign='left';}
+    cx.restore();
+    // indicador de acuífero (tanque lateral) suavizado hacia meter
+    aqDisp+=(meter-aqDisp)*Math.min(1,dt*8);drawTank();
+    // multiplicador
+    if(mult()>1){cx.fillStyle='#e8c86a';cx.font="20px 'Oswald',sans-serif";cx.textAlign='left';cx.fillText('×'+mult(),14,28);}
+    // flash rojo breve al capturar ácida (decae)
+    if(flash>0.01){cx.globalAlpha=flash*0.35;cx.fillStyle='#9c4a2a';cx.fillRect(0,0,W,H);cx.globalAlpha=1;flash*=reduced?0.7:0.82;}
+  }
   function key(e){if(!ov.classList.contains('on'))return;if(e.key==='ArrowLeft')left=true;if(e.key==='ArrowRight')right=true;if(e.key===' '||e.key==='Enter'){e.preventDefault();if(state!=='play')start();}if(e.key==='Escape')close();}
   function kup(e){if(e.key==='ArrowLeft')left=false;if(e.key==='ArrowRight')right=false;}
   function mv(e){if(state!=='play')return;var r=cv.getBoundingClientRect();paddle.x=((e.clientX-r.left)/r.width)*W;}
