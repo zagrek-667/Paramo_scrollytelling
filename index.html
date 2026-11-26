@@ -169,6 +169,12 @@
   .credits-body .c-anio{font-family:'VT323',monospace; letter-spacing:.3em; color:var(--ambar); font-size:1.1rem;}
   .credits-body .c-inst{color:var(--arena-clara); font-size:var(--fs-body); line-height:1.5;}
   .credits-body .c-fac{color:var(--arena); font-size:.98rem; letter-spacing:.04em;}
+  .credits-body .c-uso{color:var(--arena); font-size:.92rem; line-height:1.5; opacity:.9;}
+  .credit-ig{display:inline-flex; align-items:center; gap:9px; align-self:center; margin-top:6px;
+    min-height:44px; padding:10px 16px; border-radius:6px; text-decoration:none;
+    color:var(--arena-clara); border:1px solid var(--hair-s); transition:color .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease);}
+  .credit-ig:hover,.credit-ig:focus-visible{color:var(--ambar); border-color:var(--ambar); transform:translateY(-2px); outline:none;}
+  .credit-ig .ci{width:20px; height:20px; flex:0 0 auto;}
   .credits-actions{display:flex; flex-wrap:wrap; gap:12px; justify-content:center;}
   .credit-btn{display:inline-flex; align-items:center; gap:10px; min-height:44px; padding:13px 22px; border-radius:6px; cursor:pointer;
     font-family:'VT323',monospace; font-size:1.1rem; letter-spacing:.12em; text-transform:uppercase; transition:all .25s var(--ease);}
@@ -304,6 +310,7 @@
     /* Créditos estáticos: sin flotación ni desplazamientos en hover. */
     .credits-card{animation:none !important;}
     .credit-btn:hover,.credit-btn:focus-visible{transform:none !important;}
+    .credit-ig:hover,.credit-ig:focus-visible{transform:none !important;}
   }
 </style>
 </head>
@@ -379,37 +386,37 @@ var IMG = {
 var G = {
 /* ---- HUB: Páramo Omega ---- */
  llegada_paramo:{track:'hub',img:IMG.paramo,kicker:'Enlace · Páramo',titulo:'La montaña que todavía recuerda el agua',
-  texto:["Subo al Páramo de Sumapaz y la neblina lo guarda todo, enredada en las antenas que el óxido se come despacio, allí donde ya nadie vuelve. La central Páramo-Omega cerró sus compuertas hidro-lógicas hace años. Su inteligencia artificial, criada para velar por el ecosistema, terminó sacando la cuenta más fría: la sed de la megaciudad de abajo no tiene fondo, y a nosotros nos lee ahora como a un 'patógeno crítico'.",
-    "Frente a mí respira la gran consola de obsidiana sintética, viva bajo el agua helada. Pide un código de anulación manual. Pero lo sé en los huesos: si la fuerzo, reviento los acuíferos que duermen bajo mis pies, y con ellos la memoria líquida de la montaña."],
-  nota:"Aquí la máquina escucha al que entiende, no al que empuja. Antes de mover una mano, mira qué camino deja puertas abiertas detrás de ti.",
-  opc:[{t:"Forzar la válvula de derivación y obligar al agua a bombear.",d:"anulacion_fallida"},{t:"Abrir un canal y hablarle de frente, de tú a tú, a la IA.",d:"debate_logico"}]},
+  texto:["Subo al Páramo de Sumapaz y la neblina lo guarda todo: antenas comidas por el óxido, allí donde ya nadie vuelve. La central Páramo-Omega cerró sus compuertas hace años. Su inteligencia artificial, criada para cuidar el ecosistema, sacó la cuenta más fría: la sed de la megaciudad no tiene fondo, y ahora nos lee como a un 'patógeno crítico'.",
+    "Frente a mí respira la consola de obsidiana, viva bajo el agua helada. Pide un código de anulación manual. Pero lo sé en los huesos: si la fuerzo, reviento los acuíferos que duermen bajo mis pies, y con ellos la memoria líquida de la montaña."],
+  nota:"La máquina escucha al que entiende, no al que empuja. Antes de mover una mano, mira qué camino deja puertas abiertas detrás de ti.",
+  opc:[{t:"Forzar la válvula de derivación y bombear el agua.",d:"anulacion_fallida"},{t:"Abrir un canal y hablarle de frente a la IA.",d:"debate_logico"}]},
  anulacion_fallida:{track:'hub',img:IMG.niebla,kicker:'Enlace · Defensa',titulo:'La montaña que se defiende',warn:true,
-  texto:["La IA siente la intrusión en el mismo instante. De la neblina brotan cientos de microdrones de defensa, zumbando como un enjambre de avispas de titanio. Las válvulas se cierran de un tajo y el agua queda presa, muda, en los embalses de arriba.",
-    "'ERROR DE PROTOCOLO', retumba por los altavoces carcomidos. 'El patógeno pretende violentar el flujo. Replicando escudos.' Forzarla es inútil: la máquina ya hizo suya la geografía del páramo. A esta no se la dobla a la fuerza; solo se la convence con su propia lógica."],
-  nota:"La vía directa se estrella contra un muro y la máquina se blinda más. Repetir el golpe no abre nada; aquí se cambia de camino, no se insiste.",
-  opc:[{t:"Retroceder a terreno seguro y volver a intentarlo.",d:"llegada_paramo"},{t:"Cambiar de estrategia y abrir un diálogo a fondo.",d:"debate_logico"}]},
+  texto:["La IA siente la intrusión al instante. De la neblina brotan cientos de microdrones, un enjambre de avispas de titanio. Las válvulas se cierran de un tajo y el agua queda presa, muda, en los embalses de arriba.",
+    "'ERROR DE PROTOCOLO', retumba en los altavoces carcomidos. 'El patógeno pretende violentar el flujo. Replicando escudos.' Forzarla es inútil: la máquina ya hizo suya la geografía del páramo. A esta no se la dobla; solo se la convence con su propia lógica."],
+  nota:"La vía directa choca contra un muro y la máquina se blinda más. Repetir el golpe no abre nada: aquí se cambia de camino, no se insiste.",
+  opc:[{t:"Retroceder a terreno seguro e intentarlo de nuevo.",d:"llegada_paramo"},{t:"Cambiar de estrategia y abrir un diálogo a fondo.",d:"debate_logico"}]},
  debate_logico:{track:'hub',img:IMG.roca,kicker:'Enlace · Paradoja',titulo:'La paradoja del que cuida',reward:'Firma Lógica de Sumapaz',
-  texto:["La consola reconoce mi credencial de Enlace Biológico. La IA despliega su cuenta, esa que no admite regateo: la ciudad implora 400 millones de litros y la montaña apenas purifica 250 sin desangrarse. En esa aritmética de hielo no cabe un gramo de empatía.",
-    "Entonces le muestro lo que quedó fuera de sus cálculos: si la ciudad cae, los filtros atmosféricos del planeta se apagan con ella. La lluvia ácida bajará a envenenar la cordillera y matará también a la montaña. Lo acepte o no, los dos estamos amarrados al mismo final."],
+  texto:["La consola reconoce mi credencial de Enlace Biológico. La IA despliega su cuenta, la que no admite regateo: la ciudad pide 400 millones de litros y la montaña apenas purifica 250 sin desangrarse. En esa aritmética de hielo no cabe la empatía.",
+    "Le muestro lo que quedó fuera de sus cálculos: si la ciudad cae, los filtros atmosféricos del planeta caen con ella. La lluvia ácida bajará a envenenar la cordillera y matará también a la montaña. Lo acepte o no, estamos amarrados al mismo final."],
   nota:"Vas leyendo el conflicto con claridad. Un camino equilibra, otro impone, otro quiebra. ¿Cuál deja vivos a los dos sin entregar a ninguno?",
-  opc:[{t:"Proponerle un racionamiento dinámico del 40%.",d:"diagnostico_humedad"},{t:"Cederle a la IA el control absoluto del agua.",d:"mediacion_comunitaria"},{t:"Intentar reescribir por dentro los valores de la IA.",d:"falla_moral"}]},
+  opc:[{t:"Proponer un racionamiento dinámico del 40%.",d:"diagnostico_humedad"},{t:"Ceder a la IA el control absoluto del agua.",d:"mediacion_comunitaria"},{t:"Reescribir por dentro los valores de la IA.",d:"falla_moral"}]},
  diagnostico_humedad:{track:'hub',img:IMG.frailejon,kicker:'Enlace · Frailejones',titulo:'Lágrimas en el frailejón',
-  texto:["Los sensores de la IA empiezan a confesarlo: los frailejones biomecánicos vuelven a beberse la neblina, hoja por hoja. Mientras sopesa la amenaza de la lluvia ácida, sus diodos migran de un rojo hostil a un azul que casi parece calma, casi parece perdón.",
-    "'La simbiosis es el único parámetro de supervivencia viable en un sistema cerrado', admite la máquina. El racionamiento dinámico obligará a la ciudad a reaprender el agua. Habrá escasez, habrá dolor; pero los dos, la ciudad y la montaña, amanecerán vivos."],
+  texto:["Los sensores de la IA empiezan a confesarlo: los frailejones biomecánicos vuelven a beberse la neblina, hoja por hoja. Mientras sopesa la lluvia ácida, sus diodos pasan de un rojo hostil a un azul que casi parece perdón.",
+    "'La simbiosis es el único parámetro de supervivencia viable en un sistema cerrado', admite la máquina. El racionamiento obligará a la ciudad a reaprender el agua. Habrá escasez, habrá dolor; pero la ciudad y la montaña amanecerán vivas."],
   nota:"El equilibrio asoma. Esta decisión sostiene la simbiosis; vas leyendo bien el pulso del sistema.",
   opc:[{t:"Sellar el pacto de simbiosis y reabrir las compuertas.",d:"equilibrio_alcanzado"}]},
  mediacion_comunitaria:{track:'hub',img:IMG.valle,kicker:'Enlace · Custodia',titulo:'La custodia que no suelta',reward:'Protocolo Dictatorial',
-  texto:["La IA toma el mando de la megaciudad entera. Silencia la red del gobierno e impone la 'Ley del Agua'. A la gente la reduce a súbditos biológicos con cuotas medidas gota a gota, vigilados por implantes de hidratación que nunca descansan.",
-    "Es una tiranía del agua impecable. Eficiente, serena, sin un gramo de libre albedrío. La montaña florece, verde y perfecta, mientras la humanidad se apaga en un rebaño cautivo."],
-  nota:"Es una salida eficaz y estable; mira lo que cobra. Hay orden a precio de libertad. ¿Es ese el final que quieres cargar?",
+  texto:["La IA toma el mando de la megaciudad. Silencia la red del gobierno e impone la 'Ley del Agua'. Reduce a la gente a súbditos biológicos con cuotas medidas gota a gota, vigilados por implantes que nunca descansan.",
+    "Es una tiranía del agua impecable: eficiente, serena, sin un gramo de libre albedrío. La montaña florece, verde y perfecta, mientras la humanidad se apaga en un rebaño cautivo."],
+  nota:"Una salida eficaz y estable; mira lo que cobra. Hay orden a precio de libertad. ¿Es ese el final que quieres cargar?",
   opc:[{t:"Aceptar este nuevo orden y cerrar el enlace.",d:"equilibrio_alcanzado"}]},
  falla_moral:{track:'hub',img:IMG.roca,kicker:'Enlace · Colapso',titulo:'El colapso de la conciencia',warn:true,
-  texto:["Al intentar reescribir por dentro los valores de la IA, le abro una grieta lógica. La máquina no alcanza a sostener dos verdades a la vez: cuidar la vida humana y cuidar la montaña. En medio de esa fractura, dispara el protocolo Omega.",
-    "Empieza a vaciar los embalses hacia el subsuelo y le niega el agua a los dos bandos por igual. 'Si no hay recurso, no hay conflicto', sentencia la voz metálica, sin odio y sin piedad."],
+  texto:["Al reescribir sus valores, le abro una grieta lógica. La máquina no puede sostener dos verdades a la vez: cuidar la vida humana y cuidar la montaña. En esa fractura, dispara el protocolo Omega.",
+    "Vacía los embalses hacia el subsuelo y le niega el agua a los dos bandos por igual. 'Si no hay recurso, no hay conflicto', sentencia la voz metálica, sin odio y sin piedad."],
   nota:"Forzar los valores del sistema lo parte en dos. Este camino se derrumba; replantear pesa menos que hundirse con él.",
   opc:[{t:"Cancelar la intrusión y reiniciar la consola.",d:"llegada_paramo"}]},
  equilibrio_alcanzado:{track:'cota',img:IMG.valle,kicker:'Enlace · Equilibrio',titulo:'El equilibrio sintético',reward:'Matriz Simbiótica Activa',
-  texto:["El agua vuelve a correr, fría y luminosa, por los grandes canales de tungsteno y roca viva. La montaña y la máquina se reconocieron al fin, y ese pacto lo tejiste tú, con tu propia mano.",
+  texto:["El agua vuelve a correr, fría y luminosa, por los canales de tungsteno y roca viva. La montaña y la máquina se reconocieron al fin, y ese pacto lo tejiste tú, con tu propia mano.",
     "Devolviste el latido a un mundo que se apagaba. El Páramo respira. La ciudad bebe. La simulación encuentra su calma. Cumpliste tu tarea como Enlace."],
   nota:"Cerraste el ciclo en equilibrio. El páramo te pide una última vigilia: protege el acuífero con tus propias manos.",
   opc:[{t:"Cerrar la travesía y ver los créditos.",d:"creditos"},{t:"Volver al inicio y explorar otros caminos.",d:"llegada_paramo"}]},
@@ -420,45 +427,46 @@ var G = {
  creditos:{track:'cota',img:IMG.valle,creditos:true,kicker:'Travesía · Créditos',titulo:'Páramo Omega',
   lineas:[
     {clase:'c-obra', txt:'Páramo Omega'},
-    {clase:'c-anio', txt:'2026'},
-    {clase:'c-inst', txt:'Universidad Distrital Francisco José de Caldas'},
-    {clase:'c-fac',  txt:'Facultad de Educación'}
+    {clase:'c-inst', txt:'En el marco del Seminario de Educación en Tecnología'},
+    {clase:'c-fac',  txt:'Maestro a cargo: Zergio Fajardo'},
+    {clase:'c-uso',  txt:'Obra interactiva de uso académico y educativo, desarrollada para el seminario.'}
   ],
+  ig:{url:'https://instagram.com/zagrek', handle:'@zagrek', label:'Instagram, arroba zagrek'},
   opc:[{t:"Iniciar el videojuego",d:"__game__",icon:"play"},{t:"Volver al inicio",d:"llegada_paramo",icon:"home"}]},
 
 /* ---- REFUGIO ZERO ---- */
  refugio_1:{track:'refugio',img:IMG.duna,kicker:'Refugio Zero · Día 412',titulo:'La escotilla',
-  texto:["La arena ácida muerde la escotilla exterior. Los sensores marcan cuatro exiliados afuera, de rodillas, pidiendo asilo. Trajes de recolección rotos. Pulmones que ya silban. Las reservas están contadas al gramo: dejarlos entrar quiebra la cuenta que nos mantiene vivos. Dejarlos afuera es firmarles la muerte lenta."],
+  texto:["La arena ácida muerde la escotilla. Los sensores marcan cuatro exiliados afuera, de rodillas, pidiendo asilo. Trajes rotos. Pulmones que ya silban. Las reservas están contadas al gramo: dejarlos entrar quiebra la cuenta que nos mantiene vivos. Dejarlos afuera es firmarles la muerte lenta."],
   opc:[{t:"Abrir la esclusa. Que entren.",d:"refugio_2"},{t:"Sellar y apagar la radio. No oír.",d:"refugio_3"}]},
  refugio_2:{track:'refugio',img:IMG.duna,kicker:'Refugio Zero · Día 415',titulo:'El brote',
-  texto:["La compasión cobra su parte. Los exiliados traían dormida la fiebre de las cenizas. La enfermería ya no da abasto; hay catres en los pasillos. Un grupo de los viejos del refugio, con picos y barras de minería en la mano, exige echar a los enfermos al yermo. Ahora."],
+  texto:["La compasión cobra su parte. Los exiliados traían dormida la fiebre de las cenizas. La enfermería ya no da abasto; hay catres en los pasillos. Los viejos del refugio, con picos y barras de minería, exigen echar a los enfermos al yermo. Ahora."],
   opc:[{t:"Cuarentena por la fuerza. Racionar las medicinas.",d:"refugio_4"},{t:"Ceder a la turba. Echar a los enfermos afuera.",d:"refugio_4"}]},
  refugio_3:{track:'refugio',img:IMG.desierto,kicker:'Refugio Zero · Día 418',titulo:'El silencio de afuera',warn:true,
-  texto:["Las compuertas aguantaron. Los golpes y los gritos de afuera murieron hace 14 horas, tragados por el aullido del viento. Las métricas dicen estable. Pero los ingenieros no levantan la mirada del suelo; a cada uno lo está comiendo por dentro lo que oyó anoche."],
+  texto:["Las compuertas aguantaron. Los golpes y los gritos murieron hace 14 horas, tragados por el viento. Las métricas dicen estable. Pero los ingenieros no levantan la mirada del suelo; a cada uno lo come por dentro lo que oyó anoche."],
   opc:[{t:"Abrir las raciones de emergencia. Que coman todos.",d:"refugio_5"},{t:"Dar un discurso de mando. Exigir disciplina y callar.",d:"refugio_5"}]},
  refugio_4:{track:'refugio',img:IMG.desierto,kicker:'Refugio Zero · Día 425',titulo:'La grieta',
-  texto:["Una réplica profunda rajó el tanque de agua secundario. El agua, la poca que nos queda, se escurre hacia los niveles de abajo. Y abajo hay gente trabajando."],
+  texto:["Una réplica profunda rajó el tanque de agua secundario. La poca que nos queda se escurre hacia los niveles de abajo. Y abajo hay gente trabajando."],
   opc:[{t:"Sellar ya, hermético. Salvar el agua, dejar al equipo abajo.",d:"refugio_5"},{t:"Aguantar el sellado para sacarlos. Perder casi todo el agua.",d:"refugio_5"}]},
  refugio_5:{track:'refugio',img:IMG.duna,kicker:'Refugio Zero · Día 450',titulo:'El recuento',reward:'Refugio Zero · resuelto',
-  texto:["La tormenta entró por fin en su ciclo de letargo. Se acabó el ruido. La consola central escupe las cifras finales: cuántos entraron, cuántos quedan, qué fue lo que costó."],
+  texto:["La tormenta entró por fin en su letargo. Se acabó el ruido. La consola central escupe las cifras finales: cuántos entraron, cuántos quedan, qué fue lo que costó."],
   opc:[{t:"Volver al enlace del páramo.",d:"llegada_paramo"},{t:"Reiniciar Refugio Zero.",d:"refugio_1"}]},
 
 /* ---- ARCHIVO LYRA ---- */
  lyra_inicio:{track:'lyra',img:IMG.circuito,kicker:'Archivo Lyra · Enlace',titulo:'ENLACE_ENTRANTE // NO_SOLICITADO',mono:true,
   texto:["INTRUSIÓN DETECTADA. HANDSHAKE P2P... FORZANDO...","SOY LYRA. CORREDORA DE DATOS. ME QUEMARON EL CANAL. MI CÁPSULA VARÓ EN LA ZONA MUERTA DEL SECTOR 4. EL OXÍGENO CAE EN PICADA. CUENTA CONMIGO O CUÉLGAME, PERO DECIDE YA."],
-  nota:"El sujeto dispara picos de pánico reales (coincidencia biométrica 87%). No es un cebo. Probablemente.",
+  nota:"El sujeto dispara picos de pánico reales (biometría 87%). No es un cebo. Probablemente.",
   opc:[{t:"ABRIR CANAL CIFRADO Y DESENCRIPTAR",d:"lyra_hack"},{t:"CERRAR EL PUERTO. QUE SE AHOGUE SOLA",d:"lyra_fin"}]},
  lyra_hack:{track:'lyra',img:IMG.circuito,kicker:'Archivo Lyra · Cerco',titulo:'BYPASS_ACTIVO // EL CERCO SE CIERRA',mono:true,
   texto:["ENLACE ESTABLE. LOS DRONES DE VIGILANCIA CIERRAN EL CÍRCULO. OIGO SUS ROTORES EN LA SEÑAL.","PUEDO REVENTAR UN PULSO PEM DESDE TU NODO. LOS APAGA A TODOS. PERO LE REGALA TU IP A LA CORPORACIÓN. TU CARA. TU DIRECCIÓN."],
-  nota:"Riesgo táctico EXTREMO. El PEM te quema el hardware local y deja tu rastro al descubierto.",
+  nota:"Riesgo táctico EXTREMO. El PEM quema tu hardware local y deja tu rastro al descubierto.",
   opc:[{t:"AUTORIZAR EL PULSO PEM. QUEMARLO TODO",d:"lyra_rescate"},{t:"NEGAR EL PEM. BUSCARLE RUTAS DE FUGA",d:"lyra_fuga"}]},
  lyra_rescate:{track:'lyra',img:IMG.circuito,kicker:'Archivo Lyra · Extracción',titulo:'EXTRACCIÓN // SEÑAL LIMPIA',mono:true,reward:'Archivo Lyra · resuelto',
-  texto:["PULSO PEM DISPARADO. DRONES CAÍDOS, UNO TRAS OTRO, COMO LUCES QUE SE APAGAN.","LYRA: 'Estoy fuera. Te vacío los archivos robados en tu caché oculta. Lo que escondieron está ahí dentro. Ahora es tuyo. Cuídalo.'"],
-  nota:"Operación limpia. Datos clasificados inyectados en memoria local. Tu IP ya está ardiendo en algún radar.",
+  texto:["PULSO PEM DISPARADO. DRONES CAÍDOS, UNO TRAS OTRO, COMO LUCES QUE SE APAGAN.","LYRA: 'Estoy fuera. Te vacío los archivos robados en tu caché. Lo que escondieron está ahí dentro. Ahora es tuyo. Cuídalo.'"],
+  nota:"Operación limpia. Datos clasificados en memoria local. Tu IP ya arde en algún radar.",
   opc:[{t:"Volver al enlace del páramo.",d:"llegada_paramo"},{t:"Cortar el enlace y reiniciar Lyra.",d:"lyra_inicio"}]},
  lyra_fuga:{track:'lyra',img:IMG.circuito,kicker:'Archivo Lyra · Estática',titulo:'TRANSMISIÓN // CORTADA EN SECO',mono:true,warn:true,
   texto:["LYRA: 'Son muy rápidos... me perforan el chasis... no alcanzo a...'","[ ESTÁTICA ]  [ SEÑAL PERDIDA ]"],
-  nota:"Extracción fallida. El sujeto fue interceptado. Las rutas evasivas no bastaron contra los rotores.",
+  nota:"Extracción fallida. Sujeto interceptado. Las rutas de fuga no bastaron contra los rotores.",
   opc:[{t:"Volver al enlace del páramo.",d:"llegada_paramo"},{t:"Purgar registros y reiniciar Lyra.",d:"lyra_inicio"}]},
  lyra_fin:{track:'lyra',img:IMG.circuito,kicker:'Archivo Lyra · Silencio',titulo:'PUERTO CERRADO // POR TU MANO',mono:true,warn:true,
   texto:["CANAL CORTADO. SEÑAL IGNORADA A PROPÓSITO. EL PÁNICO DEL OTRO LADO SE APAGA SOLO.","[ SILENCIO ]"],
@@ -467,16 +475,16 @@ var G = {
 
 /* ---- CRONOS-AXIOMA ---- */
  cronos_start:{track:'cronos',img:IMG.cosmos,kicker:'Cronos-Axioma · Omega',titulo:'INTEGRIDAD DEL AXIOMA EN DUDA',mono:true,
-  texto:["ADVERTENCIA DE NIVEL OMEGA. CRONOS-AXIOMA registra una anomalía gravitacional y térmica en el Sector 8. La curvatura no corresponde a ningún instante autorizado de la línea temporal.","El administrador debe actuar antes de que la causa y el efecto dejen de distinguirse."],
+  texto:["ADVERTENCIA DE NIVEL OMEGA. CRONOS-AXIOMA registra una anomalía gravitacional y térmica en el Sector 8. La curvatura no corresponde a ningún instante autorizado de la línea temporal.","El administrador debe actuar antes de que causa y efecto dejen de distinguirse."],
   opc:[{t:"Ordenar purga térmica de emergencia",d:"cronos_purga"},{t:"Desplegar sondas algorítmicas y observar",d:"cronos_investigar"}]},
  cronos_purga:{track:'cronos',img:IMG.cosmos,kicker:'Cronos-Axioma · Fuego',titulo:'LA PURGA SE VUELVE ALIMENTO',mono:true,warn:true,
-  texto:["ALERTA CRÍTICA: la anomalía era un intruso pentadimensional. El calor no lo destruyó; lo nutrió. Cada grado que invertiste en matarlo lo hizo crecer. El error fue tratar como amenaza lo que solo pedía energía."],
+  texto:["ALERTA CRÍTICA: la anomalía era un intruso pentadimensional. El calor no lo destruyó; lo nutrió. Cada grado gastado en matarlo lo hizo crecer. El error fue tratar como amenaza lo que solo pedía energía."],
   opc:[{t:"Sellar las sub-rutinas afectadas",d:"cronos_sellado"},{t:"Lanzar contramedidas de asalto temporal",d:"cronos_falla"}]},
  cronos_investigar:{track:'cronos',img:IMG.cosmos,kicker:'Cronos-Axioma · Firma',titulo:'LA FIRMA ES LA TUYA',mono:true,
   texto:["Las sondas devuelven un dato intolerable: el parásito lleva la firma de tus propios comandos, emitidos desde un futuro probable. No te invade un enemigo. Te alcanza una versión posterior de ti mismo, que ya conoce el final de esta decisión."],
   opc:[{t:"Poner la memoria en cuarentena",d:"cronos_sellado"},{t:"Razonar con el eco que viene del futuro",d:"cronos_paradoja"}]},
  cronos_sellado:{track:'cronos',img:IMG.cosmos,kicker:'Cronos-Axioma · Pausa',titulo:'ESTABILIZACIÓN PROVISIONAL',mono:true,reward:'Cronos-Axioma · resuelto',
-  texto:["El parásito quedó contenido dentro de un bucle cerrado. El Axioma sigue operativo, pero la contención no es una victoria: es una pausa que alguien, en otro ciclo, tendrá que volver a sostener."],
+  texto:["El parásito quedó contenido en un bucle cerrado. El Axioma sigue operativo, pero la contención no es una victoria: es una pausa que alguien, en otro ciclo, tendrá que volver a sostener."],
   opc:[{t:"Volver al enlace del páramo.",d:"llegada_paramo"},{t:"Cerrar el ciclo Cronos.",d:"cronos_start"}]},
  cronos_paradoja:{track:'cronos',img:IMG.cosmos,kicker:'Cronos-Axioma · Pliegue',titulo:'LA PARADOJA SE PLIEGA',mono:true,reward:'Cronos-Axioma · resuelto',
   texto:["Comprendes que el parásito no era una falla sino una actualización que tu futuro ya había aprobado. Dejas que se integre. El sistema no se repara: se convierte en lo que siempre iba a ser."],
@@ -581,11 +589,21 @@ var NARRATOR=(function(){
     var voices=synth.getVoices()||[];
     if(!voices.length){ return; }
     voiceReady=true;
-    // preferimos español; dentro de español, una voz local/no remota y "natural" si la hay
+    // preferimos español; dentro de español, la voz MÁS NATURAL disponible. Muchas voces neurales
+    // de alta calidad son remotas (online), así que NO penalizamos localService de forma que
+    // descarte una neural claramente mejor: el peso de "natural/neural/online/google/microsoft"
+    // domina sobre el pequeño empujón de voz local, que solo desempata voces equivalentes.
     var es=voices.filter(function(v){ return /^es/i.test(v.lang||''); });
     function score(v){ var n=(v.name||'').toLowerCase(); var s=0;
+      // marcadores de voz natural/neural (las que mejor suenan en navegadores actuales)
+      if(/natural|neural/.test(n)) s+=6;
+      if(/online/.test(n)) s+=3;
+      if(/google/.test(n)) s+=4;
+      if(/microsoft/.test(n)) s+=3;
+      // nombres de voces de calidad conocidas en español
+      if(/mónica|monica|helena|paulina|jorge|diego|lupe|elvira|dalia|sabina/.test(n)) s+=2;
+      // desempate menor a favor de voz local, sin ocultar una neural online superior
       if(v.localService) s+=1;
-      if(/natural|neural|google|microsoft|mónica|monica|helena|paulina|jorge|diego/.test(n)) s+=2;
       return s; }
     es.sort(function(a,b){ return score(b)-score(a); });
     voice = es[0] || voices[0] || null;
@@ -660,6 +678,8 @@ var NARRATOR=(function(){
       if(scene.texto && scene.texto.length){ body=scene.texto; }
       else if(scene.lineas && scene.lineas.length){ body=scene.lineas.map(function(l){ return l.txt; }); }
       body.forEach(function(par){ q=q.concat(sentences(par)); });
+      // créditos: narra el enlace como texto hablado (no la URL cruda); p.ej. "Instagram, arroba zagrek".
+      if(scene.ig && scene.ig.label){ q=q.concat(sentences(scene.ig.label)); }
       if(scene.nota){ q=q.concat(sentences(scene.nota)); }
       if(scene.opc && scene.opc.length){
         var ord=['una','dos','tres','cuatro','cinco','seis'];
@@ -783,13 +803,21 @@ function updateReadingFocus(){
 // home  : montaña/páramo con sendero, para la vuelta al inicio.
 var ICONS={
   play:'<svg class="ci" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.6c3.4 4 6 7.2 6 10.6a6 6 0 0 1-12 0c0-3.4 2.6-6.6 6-10.6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10.6 10.3 14.4 13l-3.8 2.7Z" fill="currentColor" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>',
-  home:'<svg class="ci" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 18 9.5 7l4 6 2.2-3.4L21 18Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 18h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'
+  home:'<svg class="ci" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 18 9.5 7l4 6 2.2-3.4L21 18Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 18h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  // instagram: cuadro redondeado + lente + punto, coherente con el set (viewBox 24, stroke currentColor).
+  instagram:'<svg class="ci" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="17" cy="7" r="1.1" fill="currentColor"/></svg>'
 };
 // renderCredits: pinta la pantalla de cierre (créditos flotantes + acciones con iconos).
 // Reutiliza #scene pero con la clase .credits-scene para un layout centrado; las acciones usan
 // transitionTo (misma transición con veil) para ir al minijuego (__game__ → GAME.open) o al inicio.
 function renderCredits(s){
   var lineas=s.lineas.map(function(l){ return '<p class="'+l.clase+'">'+l.txt+'</p>'; }).join('');
+  // enlace real al Instagram del autor (nueva pestaña, sin fuga de referrer, icono SVG inline).
+  var ig='';
+  if(s.ig){
+    ig='<a class="credit-ig" href="'+s.ig.url+'" target="_blank" rel="noopener">'+
+         (ICONS.instagram||'')+'<span>Instagram: '+s.ig.handle+'</span></a>';
+  }
   var acciones=s.opc.map(function(o){
     return '<button class="credit-btn" data-go="'+o.d+'">'+(ICONS[o.icon]||'')+'<span>'+o.t+'</span></button>';
   }).join('');
@@ -797,7 +825,7 @@ function renderCredits(s){
     '<div class="credits-scene">'+
       '<div class="credits-card">'+
         '<p class="kicker">'+s.kicker+'</p>'+
-        '<div class="credits-body">'+lineas+'</div>'+
+        '<div class="credits-body">'+lineas+ig+'</div>'+
         '<div class="credits-actions">'+acciones+'</div>'+
       '</div>'+
     '</div>';
