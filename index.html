@@ -107,7 +107,12 @@
   .track-lyra #haze{opacity:.5; filter:hue-rotate(78deg) saturate(.95);}
   .track-cronos #haze{opacity:.5; filter:hue-rotate(168deg) saturate(.9);}
 
-  #scene{position:relative; z-index:4; max-width:720px; margin:0 auto; padding:16vh clamp(22px,6vw,64px) 22vh; min-height:100vh; min-height:100svh;}
+  /* El padding-bottom reserva una banda inferior para que el contenido scrolleable de #scene
+     (en especial las .choice) NUNCA quede por debajo de los controles fijos #ctrl / #routes.
+     En escritorio 22vh basta, pero en móvil/viewports cortos #routes apila 3 botones (~146px)
+     y #ctrl puede envolver a 2 filas, anclados a 16px+safe-area del borde inferior; por eso se
+     fija un suelo en px (max()) que cubre esa banda real + safe-area-inset-bottom. */
+  #scene{position:relative; z-index:4; max-width:720px; margin:0 auto; padding:16vh clamp(22px,6vw,64px) calc(max(22vh, 220px) + env(safe-area-inset-bottom,0px)); min-height:100vh; min-height:100svh;}
   .kicker{font-family:'VT323',monospace; font-size:clamp(.9rem,1.9vw,1.15rem); letter-spacing:.3em; color:var(--ambar); text-transform:uppercase; margin:0 0 12px;}
   #scene h2{font-size:var(--fs-h2); line-height:1.05; margin:0 0 24px; color:var(--hueso); text-shadow:0 2px 20px rgba(0,0,0,.55); overflow-wrap:break-word; hyphens:auto;}
   .body{font-size:var(--fs-body); line-height:1.78; color:var(--arena-clara);}
@@ -440,7 +445,7 @@ var G = {
     {clase:'c-fac',  txt:'Maestro a cargo: Zergio Fajardo'},
     {clase:'c-uso',  txt:'Obra interactiva de uso académico y educativo, desarrollada para el seminario.'}
   ],
-  ig:{url:'https://instagram.com/zagrek', handle:'@zagrek', label:'Instagram, arroba zagrek'},
+  ig:{url:'https://instagram.com/zagreirus', handle:'zagreirus', label:'Instagram, zagreirus'},
   opc:[{t:"Iniciar el videojuego",d:"__game__",icon:"play"},{t:"Volver al inicio",d:"llegada_paramo",icon:"home"}]},
 
 /* ---- REFUGIO ZERO ---- */
