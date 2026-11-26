@@ -67,7 +67,7 @@
   /* ESCENA (un camino a la vez) */
   #stage{position:relative; z-index:3; display:none; min-height:100vh; min-height:100svh;}
   #stage.on{display:block;}
-  #bg{position:fixed; inset:0; z-index:1; background-size:cover; background-position:center; transition:background-image .9s var(--ease), opacity .9s var(--ease); will-change:transform; transform:scale(1.06);}
+  #bg{position:fixed; inset:0; z-index:1; background-size:cover; background-position:center; transition:background-image .9s var(--ease), opacity .9s var(--ease); will-change:transform; transform:scale(1.06); filter:saturate(.6) brightness(.74) contrast(1.06) sepia(.2);}
   #bg-tint{position:fixed; inset:0; z-index:1; pointer-events:none; transition:background .9s var(--ease);
     background:linear-gradient(180deg, rgba(20,17,12,.5) 0%, rgba(20,17,12,.2) 42%, rgba(20,17,12,.82) 100%);}
 
@@ -371,15 +371,15 @@
 "use strict";
 var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var IMG = {
-  paramo:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1900&q=85',
-  niebla:'https://images.unsplash.com/photo-1511497584788-876760111969?auto=format&fit=crop&w=1900&q=85',
-  roca:'https://images.unsplash.com/photo-1464278533981-50106e6176b1?auto=format&fit=crop&w=1900&q=85',
-  frailejon:'https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=1900&q=85',
-  valle:'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1900&q=85',
-  desierto:'https://images.unsplash.com/photo-1509316785289-025f5b846b35?auto=format&fit=crop&w=1900&q=85',
-  duna:'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1900&q=85',
-  circuito:'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1900&q=85',
-  cosmos:'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1900&q=85'
+  paramo:'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=1900&q=85',
+  niebla:'https://images.unsplash.com/photo-1465919292275-c60ba49da6ae?auto=format&fit=crop&w=1900&q=85',
+  roca:'https://images.unsplash.com/photo-1621451537084-482c73073a0f?auto=format&fit=crop&w=1900&q=85',
+  frailejon:'https://images.unsplash.com/photo-1516214104703-d870798883c5?auto=format&fit=crop&w=1900&q=85',
+  valle:'https://images.unsplash.com/photo-1547234935-80c7145ec969?auto=format&fit=crop&w=1900&q=85',
+  desierto:'Rusted_steel_bunker_blast_door.jpg',
+  duna:'Rusted_steel_bunker_blast_door.jpg',
+  circuito:'https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?auto=format&fit=crop&w=1900&q=85',
+  cosmos:'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1900&q=85'
 };
 
 /* ====== GRAFO NARRATIVO: 4 rutas (hub + 3 terminales), cada elección abre otra ====== */
