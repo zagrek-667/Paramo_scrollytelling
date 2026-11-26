@@ -6,7 +6,7 @@
 <title>Páramo Omega · Travesía</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;500;700&family=Inter:wght@400;500;600&family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@300;500;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=Orbitron:wght@500;700&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231a140d'/%3E%3Cpath d='M32 12L49 22V42L32 52L15 42V22Z' fill='none' stroke='%23c9872f' stroke-width='3' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23c9872f'/%3E%3C/svg%3E">
 <style>
   :root{
@@ -17,10 +17,12 @@
     /* easing con overshoot (rebote sutil) para la apertura tipo "ventana de sistema operativo" */
     --ease-win:cubic-bezier(.16,1.18,.3,1);
     --fs-display:clamp(2.4rem,7vw,5.4rem); --fs-h2:clamp(1.5rem,4vw,2.7rem); --fs-body:clamp(1rem,1.4vw,1.18rem);
+    /* Sistema tipográfico postapocalíptico: display de cartel (Anton) + cuerpo serif con alma de testimonio (Spectral) + consola (mono). */
+    --font-display:'Anton','Oswald',sans-serif; --font-body:'Spectral',Georgia,serif; --font-mono:'Share Tech Mono','VT323',monospace; --font-ui:'Oswald','Inter',sans-serif;
   }
   *{box-sizing:border-box;}
-  body{margin:0; background:var(--noche); color:var(--hueso); font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; overflow-x:hidden; min-height:100vh;}
-  h1,h2,.display{font-family:'Oswald',sans-serif; font-weight:700; letter-spacing:.01em;}
+  body{margin:0; background:var(--noche); color:var(--hueso); font-family:var(--font-body); -webkit-font-smoothing:antialiased; overflow-x:hidden; min-height:100vh;}
+  h1,h2,.display{font-family:var(--font-display); font-weight:400; letter-spacing:-.005em;}
 
   /* atmósfera de arena */
   #sand{position:fixed; inset:0; width:100vw; height:100vh; z-index:2; pointer-events:none; opacity:.55; transition:opacity 1s var(--ease);}
@@ -68,15 +70,46 @@
   #bg{position:fixed; inset:0; z-index:1; background-size:cover; background-position:center; transition:background-image .9s var(--ease), opacity .9s var(--ease); will-change:transform; transform:scale(1.06);}
   #bg-tint{position:fixed; inset:0; z-index:1; pointer-events:none; transition:background .9s var(--ease);
     background:linear-gradient(180deg, rgba(20,17,12,.5) 0%, rgba(20,17,12,.2) 42%, rgba(20,17,12,.82) 100%);}
-  /* viraje por ruta */
-  .track-hub #bg-tint{background:linear-gradient(180deg, rgba(20,17,12,.5), rgba(20,17,12,.18) 44%, rgba(20,17,12,.82));}
-  .track-refugio #bg-tint{background:linear-gradient(120deg, rgba(60,30,14,.6), rgba(20,17,12,.3) 46%, rgba(20,17,12,.85));}
-  .track-lyra #bg-tint{background:linear-gradient(120deg, rgba(18,34,22,.6), rgba(10,14,9,.35) 46%, rgba(10,12,8,.86));}
-  .track-cronos #bg-tint{background:linear-gradient(120deg, rgba(14,22,36,.6), rgba(14,16,22,.32) 46%, rgba(12,14,20,.86));}
+
+  /* CALIMA / NIEBLA SECA: capa intermedia de profundidad (parallax a distinta velocidad que #bg).
+     Gradientes radiales cálidos (arena/ámbar/óxido) de baja opacidad; mundo SECO, sin gotas ni estelas.
+     z-index:2 (junto a #sand, por encima de #bg/#bg-tint y por debajo de #stage/#scene). El JS la
+     desplaza en onScrollFrame; el drift @keyframes añade una deriva muy lenta del color. */
+  #haze{position:fixed; inset:-8% -4%; z-index:2; pointer-events:none; will-change:transform; opacity:.52;
+    background:
+      radial-gradient(60% 42% at 22% 28%, rgba(201,135,47,.20), transparent 62%),
+      radial-gradient(54% 46% at 80% 20%, rgba(156,74,42,.16), transparent 64%),
+      radial-gradient(70% 50% at 50% 92%, rgba(201,169,120,.14), transparent 68%);
+    background-size:140% 140%, 130% 130%, 160% 160%;
+    background-position:18% 30%, 82% 22%, 50% 90%;
+    animation:hazeDrift 46s ease-in-out infinite alternate;}
+  @keyframes hazeDrift{
+    0%{background-position:14% 26%, 84% 20%, 48% 92%;}
+    100%{background-position:26% 36%, 72% 30%, 56% 84%;}}
+
+  /* GRANO + SCANLINES globales muy sutiles (sobre el contenido pero por debajo de HUD/controles/veil).
+     Estático; opacidad muy baja para no estorbar la lectura. */
+  #grain{position:fixed; inset:0; z-index:5; pointer-events:none; opacity:.05; mix-blend-mode:overlay;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,.55) 0 1px, transparent 1px 3px),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+    background-size:auto, 120px 120px;}
+
+  /* viraje por ruta (más dramático, conservando el degradado de legibilidad: oscuro arriba y abajo) */
+  .track-hub #bg-tint{background:linear-gradient(180deg, rgba(28,20,10,.58), rgba(40,26,12,.16) 44%, rgba(16,12,8,.86));}
+  .track-cota #bg-tint{background:linear-gradient(180deg, rgba(34,22,10,.6), rgba(48,30,12,.18) 44%, rgba(16,12,8,.88));}
+  .track-refugio #bg-tint{background:linear-gradient(120deg, rgba(86,36,14,.68), rgba(44,22,10,.28) 46%, rgba(18,12,8,.9));}
+  .track-lyra #bg-tint{background:linear-gradient(120deg, rgba(20,46,26,.66), rgba(10,20,10,.3) 46%, rgba(8,12,7,.9));}
+  .track-cronos #bg-tint{background:linear-gradient(120deg, rgba(14,28,52,.68), rgba(12,18,30,.3) 46%, rgba(9,12,20,.9));}
+
+  /* tinte del #haze por ruta (refuerza el viraje; mantiene calidez seca salvo rutas frías/verdes) */
+  .track-refugio #haze{opacity:.6; filter:saturate(1.15) hue-rotate(-6deg);}
+  .track-lyra #haze{opacity:.5; filter:hue-rotate(78deg) saturate(.95);}
+  .track-cronos #haze{opacity:.5; filter:hue-rotate(168deg) saturate(.9);}
 
   #scene{position:relative; z-index:4; max-width:720px; margin:0 auto; padding:16vh clamp(22px,6vw,64px) 22vh; min-height:100vh; min-height:100svh;}
   .kicker{font-family:'VT323',monospace; font-size:clamp(.9rem,1.9vw,1.15rem); letter-spacing:.3em; color:var(--ambar); text-transform:uppercase; margin:0 0 12px;}
-  #scene h2{font-size:var(--fs-h2); line-height:1.05; margin:0 0 24px; color:var(--hueso); text-shadow:0 2px 20px rgba(0,0,0,.55);}
+  #scene h2{font-size:var(--fs-h2); line-height:1.05; margin:0 0 24px; color:var(--hueso); text-shadow:0 2px 20px rgba(0,0,0,.55); overflow-wrap:break-word; hyphens:auto;}
   .body{font-size:var(--fs-body); line-height:1.78; color:var(--arena-clara); overflow:hidden;}
   /* Lectura acoplada al scroll (estilo The Boat): cada párrafo ajusta su opacidad y un leve
      desplazamiento vertical según su distancia al centro del viewport. El valor lo fija el JS
@@ -87,11 +120,11 @@
     transition:opacity .45s var(--ease), transform .45s var(--ease); will-change:opacity, transform;}
 
   /* ===== TIPOGRAFÍAS POR RUTA =====
-     Hub / historia central (track-hub, track-cota): futurista y limpia (Orbitron en títulos).
+     Hub / historia central (track-hub, track-cota): display de cartel postapocalíptica (Anton) en títulos, cuerpo serif (Spectral).
      Terminales (track-refugio, track-lyra, track-cronos): consola de los 80 (Share Tech Mono + VT323). */
-  .track-hub #scene .kicker,.track-cota #scene .kicker{font-family:'Orbitron','Oswald',sans-serif; letter-spacing:.28em;}
-  .track-hub #scene h2,.track-cota #scene h2{font-family:'Orbitron','Oswald',sans-serif; font-weight:700; letter-spacing:.02em;}
-  .track-hub #scene .body,.track-cota #scene .body{font-family:'Inter',system-ui,sans-serif;}
+  .track-hub #scene .kicker,.track-cota #scene .kicker{font-family:var(--font-display); letter-spacing:.22em;}
+  .track-hub #scene h2,.track-cota #scene h2{font-family:var(--font-display); font-weight:400; letter-spacing:.005em;}
+  .track-hub #scene .body,.track-cota #scene .body{font-family:var(--font-body);}
 
   .track-refugio #scene .kicker,.track-lyra #scene .kicker,.track-cronos #scene .kicker{font-family:'Share Tech Mono','VT323',monospace; letter-spacing:.24em;}
   .track-refugio #scene h2,.track-lyra #scene h2,.track-cronos #scene h2{font-family:'Share Tech Mono','VT323',monospace; font-weight:400; letter-spacing:.04em; text-transform:uppercase;}
@@ -132,7 +165,7 @@
   .credits-card .kicker{margin:0 0 18px;}
   .credits-body{display:flex; flex-direction:column; gap:10px; margin:0 0 30px;}
   .credits-body p{margin:0;}
-  .credits-body .c-obra{font-family:'Orbitron','Oswald',sans-serif; font-weight:700; font-size:var(--fs-h2); line-height:1.05; color:var(--hueso); text-shadow:0 2px 20px rgba(0,0,0,.55), 0 0 18px rgba(201,135,47,.28);}
+  .credits-body .c-obra{font-family:var(--font-display); font-weight:400; font-size:var(--fs-h2); line-height:1.05; color:var(--hueso); text-shadow:0 2px 20px rgba(0,0,0,.55), 0 0 18px rgba(201,135,47,.28);}
   .credits-body .c-anio{font-family:'VT323',monospace; letter-spacing:.3em; color:var(--ambar); font-size:1.1rem;}
   .credits-body .c-inst{color:var(--arena-clara); font-size:var(--fs-body); line-height:1.5;}
   .credits-body .c-fac{color:var(--arena); font-size:.98rem; letter-spacing:.04em;}
@@ -172,9 +205,36 @@
   #routes button .chk{color:var(--verde);}
   @media (max-width:640px){ #routes button{min-width:0; font-size:.72rem; padding:7px 9px;} #routes .rlabel{display:none;} #hud{font-size:.7rem; gap:9px; padding:6px 11px;} }
 
-  /* transición de cambio de escena/ruta */
-  #veil{position:fixed; inset:0; z-index:70; pointer-events:none; opacity:0; background:radial-gradient(120% 90% at 50% 50%, rgba(201,135,47,.12), rgba(20,17,12,.9)); transition:opacity .4s var(--ease);}
+  /* ===== CORTINA CINEMÁTICA DE CAMBIO DE ESCENA/RUTA =====
+     Antes #veil era un simple fade de un radial-gradient. Ahora es una CORTINA: dos bandas
+     (::before arriba, ::after abajo) que barren hacia el centro con scaleY (más barato que
+     clip-path en móvil) y se retiran, combinadas con el fundido del fondo radial del propio #veil.
+     El cierre usa --ease-win (overshoot marcado); la apertura un ease de salida. El viraje de
+     color por ruta se inyecta vía la variable --veil-tint (la fija transitionTo según el track
+     destino) para anticipar el ambiente. pointer-events:none y z-index:70 se conservan. */
+  #veil{position:fixed; inset:0; z-index:70; pointer-events:none; opacity:0;
+    --veil-tint:201,135,47;
+    background:radial-gradient(120% 90% at 50% 50%, rgba(var(--veil-tint),.14), rgba(20,17,12,.0));
+    transition:opacity .22s var(--ease);}
+  #veil::before,#veil::after{content:''; position:absolute; left:0; right:0; height:52%;
+    background:linear-gradient(var(--veil-dir,180deg), rgba(20,17,12,.98), rgba(var(--veil-tint),.22));
+    transform:scaleY(0); will-change:transform; transition:transform .3s var(--ease);}
+  #veil::before{top:0; transform-origin:top; --veil-dir:180deg;}
+  #veil::after{bottom:0; transform-origin:bottom; --veil-dir:0deg;}
+  /* FASE CIERRE: las bandas barren hasta cubrir la pantalla con overshoot; el fundido sube. */
+  #veil.closing{opacity:1; transition:opacity .26s var(--ease);}
+  #veil.closing::before,#veil.closing::after{transform:scaleY(1); transition:transform .3s var(--ease-win);}
+  /* FASE APERTURA: las bandas se retiran hacia sus bordes y el fundido baja. */
+  #veil.opening{opacity:0; transition:opacity .3s var(--ease);}
+  #veil.opening::before,#veil.opening::after{transform:scaleY(0); transition:transform .32s var(--ease);}
+  /* compat: .on mantiene un fundido pleno por si algún flujo lo usa directamente */
   #veil.on{opacity:1;}
+  /* DESENFOQUE DE TRANSICIÓN: durante el cambio, la escena se desenfoca y encoge levemente
+     para reforzar el corte; se retira al completar (clase quitada en transitionTo). Se aplica a
+     #scene (position:relative) y NO a #stage: un filter/transform en #stage convertiría a sus
+     capas de fondo fixed (#bg/#bg-tint/#haze) en contenido posicionado respecto a #stage y las
+     rompería. Así solo se desenfoca el contenido narrativo, no el fondo (que ya cruza con su fade). */
+  #scene.cut-blur{filter:blur(6px); transform:scale(.986); transition:filter .24s var(--ease), transform .24s var(--ease-win);}
   .fade-in{animation:fadeIn .7s var(--ease) both;}
   @keyframes fadeIn{from{opacity:0; transform:translateY(22px);} to{opacity:1; transform:none;}}
 
@@ -185,22 +245,22 @@
      paneles (.choice/.analysis), NUNCA en los <p> del cuerpo: así no pelea con el
      transform de la lectura por scroll (updateReadingFocus escribe --rf-ty en .body p).
      transform-origin alto para que "crezcan" desde la parte superior, como una ventana que se despliega. */
-  #scene.win-open{animation:winOpen .62s var(--ease-win) both; transform-origin:50% 12%;}
+  #scene.win-open{animation:winOpen .66s var(--ease-win) both; transform-origin:50% 10%;}
   @keyframes winOpen{
-    0%{opacity:0; transform:translateY(34px) scale(.9);}
-    60%{opacity:1;}
+    0%{opacity:0; transform:translateY(46px) scale(.86);}
+    55%{opacity:1;}
     100%{opacity:1; transform:translateY(0) scale(1);}
   }
   /* los paneles (opciones, análisis, tarjeta de créditos) se despliegan en secuencia (stagger).
      fill-mode: backwards (no both) para que al terminar la animación el elemento vuelva a su regla
      base y el transform de :hover (translateX en .choice) o la flotación de .credits-card funcionen. */
-  .win-open .choice,.win-open .analysis{animation:panelPop .5s var(--ease-win) backwards;}
+  .win-open .choice,.win-open .analysis{animation:panelPop .52s var(--ease-win) backwards;}
   @keyframes panelPop{
-    0%{opacity:0; transform:translateY(26px) scale(.94);}
+    0%{opacity:0; transform:translateY(38px) scale(.9);}
     100%{opacity:1; transform:translateY(0) scale(1);}
   }
-  .win-open .analysis{animation-delay:.08s;}
-  .win-open .choice{animation-delay:calc(.12s + var(--i,0) * .07s);}
+  .win-open .analysis{animation-delay:.1s;}
+  .win-open .choice{animation-delay:calc(.16s + var(--i,0) * .09s);}
   /* la tarjeta de créditos entra con la ventana (#scene.win-open) y conserva su flotación propia */
 
   /* aspecto de "ventana/panel de sistema": barra superior sutil que refuerza el marco.
@@ -228,9 +288,16 @@
 
   @media (prefers-reduced-motion:reduce){
     #sand{display:none;} #bg{transform:none !important; transition:none;} .fade-in{animation:none;} .choice:hover{transform:none;}
+    /* Capas de atmósfera nuevas: sin parallax ni deriva. El #haze queda estático (sin animación
+       ni transform); el #grain es estático y muy sutil, puede permanecer. */
+    #haze{animation:none !important; transform:none !important;}
     /* Sin apertura tipo ventana con rebote: aparición simple y estable. */
     #scene.win-open{animation:none !important; transform:none !important;}
     .win-open .choice,.win-open .analysis{animation:none !important; transform:none !important; opacity:1 !important;}
+    /* Cortina/desenfoque de transición: sin movimiento. El #veil no barre ni se desenfoca la
+       escena; transitionTo ya usa delay 0 en reduced, así el cambio es instantáneo y estable. */
+    #veil,#veil::before,#veil::after{transition:none !important; animation:none !important; transform:none !important;}
+    #scene.cut-blur{filter:none !important; transform:none !important; transition:none !important;}
     /* Lectura estática y legible: sin fade por scroll ni desplazamiento. */
     .body p{opacity:1 !important; transform:none !important; transition:none !important; will-change:auto;}
     .track-refugio #scene h2,.track-lyra #scene h2,.track-cronos #scene h2{animation:none !important;}
@@ -264,8 +331,10 @@
 <main id="stage">
   <div id="bg"></div>
   <div id="bg-tint"></div>
+  <div id="haze" aria-hidden="true"></div>
   <article id="scene"></article>
 </main>
+<div id="grain" aria-hidden="true"></div>
 
 <div id="ctrl" style="display:none;">
   <button id="c-sound" class="on" aria-pressed="true">♪ Sonido</button>
@@ -639,11 +708,24 @@ var NARRATOR=(function(){
 var SAND=(function(){
   var cv=document.getElementById('sand'),cx=cv.getContext('2d'),raf=null,parts=[],W,H,dpr;
   function rz(){ dpr=Math.min(devicePixelRatio||1,1.5); W=cv.width=innerWidth*dpr; H=cv.height=innerHeight*dpr; cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px'; }
-  function seed(){ parts=[]; var n=Math.round(Math.min(130,innerWidth/9)); for(var i=0;i<n;i++)parts.push(mk(true)); }
-  function mk(any){ return {x:any?Math.random()*W:-10, y:Math.random()*H, r:(Math.random()*1.7+0.4)*dpr, vx:(Math.random()*0.9+0.4)*dpr, vy:(Math.random()*0.4-0.2)*dpr, a:Math.random()*0.5+0.14}; }
+  // Dos poblaciones para dar PROFUNDIDAD sin sugerir lluvia (deriva horizontal, nunca vertical):
+  //  - arena: granos cálidos (--arena), un poco más grandes/rápidos, en primer plano.
+  //  - ceniza: motas finas, lentas y de gris cálido, al fondo (parallax de velocidad por tamaño).
+  // El tope total se mantiene acotado por innerWidth y nunca supera ~160 en total.
+  function seed(){ parts=[];
+    var nSand=Math.round(Math.min(110,innerWidth/11));
+    var nAsh=Math.round(Math.min(46,innerWidth/26));
+    for(var i=0;i<nSand;i++)parts.push(mk(true,0));
+    for(var j=0;j<nAsh;j++)parts.push(mk(true,1)); }
+  function mk(any,kind){
+    if(kind===1){ // ceniza: fina, lenta, sube/flota muy suave; gris cálido
+      return {k:1, x:any?Math.random()*W:-10, y:Math.random()*H, r:(Math.random()*0.9+0.3)*dpr,
+        vx:(Math.random()*0.45+0.18)*dpr, vy:(Math.random()*0.3-0.16)*dpr, a:Math.random()*0.28+0.08}; }
+    return {k:0, x:any?Math.random()*W:-10, y:Math.random()*H, r:(Math.random()*1.7+0.4)*dpr,
+      vx:(Math.random()*0.9+0.4)*dpr, vy:(Math.random()*0.4-0.2)*dpr, a:Math.random()*0.5+0.14}; }
   function fr(){ cx.clearRect(0,0,W,H);
     for(var i=0;i<parts.length;i++){var p=parts[i]; p.x+=p.vx; p.y+=p.vy+Math.sin((p.x+p.y)*0.003)*0.14*dpr; if(p.x>W+12){p.x=-10;p.y=Math.random()*H;} if(p.y<-12)p.y=H+10; if(p.y>H+12)p.y=-10;
-      cx.beginPath(); cx.arc(p.x,p.y,p.r,0,6.283); cx.fillStyle='rgba(201,169,120,'+p.a+')'; cx.fill();}
+      cx.beginPath(); cx.arc(p.x,p.y,p.r,0,6.283); cx.fillStyle=p.k===1?'rgba(170,158,140,'+p.a+')':'rgba(201,169,120,'+p.a+')'; cx.fill();}
     var g=cx.createLinearGradient(0,H*0.55,0,H); g.addColorStop(0,'rgba(156,74,42,0)'); g.addColorStop(1,'rgba(156,74,42,0.06)'); cx.fillStyle=g; cx.fillRect(0,H*0.55,W,H*0.45);
     raf=requestAnimationFrame(fr); }
   function onR(){ rz(); seed(); }
@@ -781,9 +863,32 @@ function render(id, pushHist){
   NARRATOR.speakScene(s);
   refreshRoutes();
 }
+// Viraje de color de la cortina por ruta destino (RGB como lista para rgba(var(--veil-tint),a)).
+// Anticipa el ambiente: hub/cota ámbar, refugio óxido, lyra verde, cronos azul.
+var VEIL_TINT={hub:'201,135,47', cota:'201,135,47', refugio:'156,74,42', lyra:'107,122,82', cronos:'70,120,190'};
+// transitionTo: contrato intacto (muestra cortina -> render a mitad -> retira cortina). Se divide
+// en dos fases con clases sobre #veil: 'closing' (barrido + fundido con overshoot) y 'opening'
+// (retirada). El escenario se desenfoca con 'cut-blur' durante el cierre y se limpia al abrir.
+// Lleva a cualquier nodo del grafo, a 'creditos' (nodo con s.creditos) y a '__game__' (GAME.open()).
+// En reduced-motion va directo a render sin cortina ni blur (delay 0).
 function transitionTo(id){
-  veil.classList.add('on');
-  setTimeout(function(){ render(id); veil.classList.remove('on'); }, reduced?0:400);
+  if(reduced){ render(id); return; }
+  // tiñe la cortina según el track destino (si el destino es un nodo conocido)
+  var dest=G[id]; veil.style.setProperty('--veil-tint', (dest&&VEIL_TINT[dest.track]) || '201,135,47');
+  // FASE 1 — cierre: la cortina barre hacia el centro y la escena se desenfoca.
+  veil.classList.remove('opening','on');
+  void veil.offsetWidth;
+  veil.classList.add('closing');
+  scene.classList.add('cut-blur');
+  setTimeout(function(){
+    // mitad del ciclo: render del nuevo contenido mientras la pantalla está cubierta.
+    render(id);
+    // FASE 2 — apertura: retira la cortina y el desenfoque para revelar la nueva escena.
+    veil.classList.remove('closing');
+    veil.classList.add('opening');
+    scene.classList.remove('cut-blur');
+    setTimeout(function(){ veil.classList.remove('opening'); }, 320);
+  }, 300);
 }
 function refreshRoutes(){
   routes.innerHTML='<span class="rlabel">Terminales remotas</span>'+
@@ -908,10 +1013,13 @@ var GAME=(function(){
    Un único listener {passive:true} para scroll y resize; el trabajo real corre una vez por frame. */
 if(!reduced){
   var rfTicking=false;
+  var haze=document.getElementById('haze');
   function onScrollFrame(){
     rfTicking=false;
     var y=window.scrollY||window.pageYOffset||0;
     bg.style.transform='scale(1.06) translateY('+(y*0.06)+'px)';
+    // Parallax de dos velocidades: la calima seca se desplaza más que el fondo (profundidad).
+    if(haze)haze.style.transform='translateY('+(y*0.12)+'px)';
     updateReadingFocus();
   }
   function requestScrollFrame(){ if(!rfTicking){ rfTicking=true; requestAnimationFrame(onScrollFrame); } }
