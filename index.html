@@ -110,12 +110,12 @@
   #scene{position:relative; z-index:4; max-width:720px; margin:0 auto; padding:16vh clamp(22px,6vw,64px) 22vh; min-height:100vh; min-height:100svh;}
   .kicker{font-family:'VT323',monospace; font-size:clamp(.9rem,1.9vw,1.15rem); letter-spacing:.3em; color:var(--ambar); text-transform:uppercase; margin:0 0 12px;}
   #scene h2{font-size:var(--fs-h2); line-height:1.05; margin:0 0 24px; color:var(--hueso); text-shadow:0 2px 20px rgba(0,0,0,.55); overflow-wrap:break-word; hyphens:auto;}
-  .body{font-size:var(--fs-body); line-height:1.78; color:var(--arena-clara); overflow:hidden;}
+  .body{font-size:var(--fs-body); line-height:1.78; color:var(--arena-clara);}
   /* Lectura acoplada al scroll (estilo The Boat): cada párrafo ajusta su opacidad y un leve
      desplazamiento vertical según su distancia al centro del viewport. El valor lo fija el JS
      (updateReadingFocus) cada frame vía variables --rf-op / --rf-ty; la transición suaviza el
      descanso y el reposicionado tras cada escena. will-change limita el coste del repintado. */
-  .body p{margin:0 0 18px; text-shadow:0 1px 8px rgba(0,0,0,.45);
+  .body p{margin:0 0 18px; text-shadow:0 1px 8px rgba(0,0,0,.45); overflow-wrap:break-word; word-break:break-word; hyphens:auto;
     opacity:var(--rf-op,1); transform:translate3d(0,var(--rf-ty,0px),0);
     transition:opacity .45s var(--ease), transform .45s var(--ease); will-change:opacity, transform;}
 
@@ -128,7 +128,10 @@
 
   .track-refugio #scene .kicker,.track-lyra #scene .kicker,.track-cronos #scene .kicker{font-family:'Share Tech Mono','VT323',monospace; letter-spacing:.24em;}
   .track-refugio #scene h2,.track-lyra #scene h2,.track-cronos #scene h2{font-family:'Share Tech Mono','VT323',monospace; font-weight:400; letter-spacing:.04em; text-transform:uppercase;}
-  .track-refugio #scene .body,.track-lyra #scene .body,.track-cronos #scene .body{font-family:'Share Tech Mono','VT323',monospace; letter-spacing:.01em; line-height:1.7;}
+  /* Cuerpo de las terminales en la MISMA serif legible del resto (Spectral): la monoespaciada
+     es mucho más ancha por carácter y era la causa principal del desbordamiento. El sabor de
+     consola de los 80 se conserva en el kicker y el h2 (que siguen en mono). */
+  .track-refugio #scene .body,.track-lyra #scene .body,.track-cronos #scene .body{font-family:var(--font-body); letter-spacing:0; line-height:1.78;}
 
   /* ===== EFECTOS DE TÍTULO POR RUTA (sutiles) =====
      Hub: resplandor ámbar futurista. Terminales: glow de fósforo + scanline + parpadeo muy discreto. */
@@ -209,7 +212,11 @@
   #routes button{font-family:'VT323',monospace; font-size:.8rem; letter-spacing:.08em; text-transform:uppercase; color:var(--arena); background:rgba(20,17,12,.68); border:1px solid var(--hair); padding:8px 12px; border-radius:4px; cursor:pointer; backdrop-filter:blur(6px); transition:all .25s var(--ease); display:flex; align-items:center; gap:7px; min-width:150px; justify-content:space-between;}
   #routes button:hover{color:var(--ambar); border-color:var(--ambar);}
   #routes button .chk{color:var(--verde);}
-  @media (max-width:640px){ #routes button{min-width:0; font-size:.72rem; padding:7px 9px;} #routes .rlabel{display:none;} #hud{font-size:.7rem; gap:9px; padding:6px 11px;} }
+  @media (max-width:640px){ #routes button{min-width:0; font-size:.72rem; padding:7px 9px;} #routes .rlabel{display:none;}
+    /* la píldora del HUD debe caber en UNA línea en móvil (p.ej. "REFUGIO ZERO · TERMINAL REMOTA"):
+       se reduce fuente/letter-spacing/gap/padding, se fuerza nowrap y se limita el ancho al viewport. */
+    #hud{font-size:.64rem; letter-spacing:.06em; gap:7px; padding:6px 10px; white-space:nowrap; max-width:calc(100vw - 20px);} }
+  @media (max-width:380px){ #hud{font-size:.58rem; letter-spacing:.04em; gap:6px; padding:5px 9px;} }
 
   /* ===== CORTINA CINEMÁTICA DE CAMBIO DE ESCENA/RUTA =====
      Antes #veil era un simple fade de un radial-gradient. Ahora es una CORTINA: dos bandas
@@ -272,8 +279,10 @@
   /* aspecto de "ventana/panel de sistema": barra superior sutil que refuerza el marco.
      Coherente con los tokens (ámbar + hairline). No altera la paleta ni la legibilidad. */
   .choice::before,.analysis::before{box-sizing:border-box;}
-  .choice{overflow:hidden;}
-  .choice::after{content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  /* las opciones deben verse completas siempre: el texto largo fluye en varias líneas y la
+     caja crece en alto, sin recorte. La barra de acento superior se limita al borde redondeado. */
+  .choice{overflow-wrap:break-word; word-break:break-word; hyphens:auto;}
+  .choice::after{content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:4px 4px 0 0;
     background:linear-gradient(90deg, var(--ambar), transparent 70%); opacity:.35; pointer-events:none; transition:opacity .25s var(--ease);}
   .choice:hover::after,.choice:focus-visible::after{opacity:.8;}
   .credits-card{overflow:hidden;}
